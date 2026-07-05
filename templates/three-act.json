@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "id": "three-act",
+    "name": "Three Act",
+    "description": "The default template. Hero first, then proof of work, then commitments. Works for most roles and seniority levels.",
+    "best_for": "General purpose. Senior IC, founding designer, player-coach. Any role where identity and narrative need to come before the work."
+  },
+
+  "section_order": [
+    "nav",
+    "act1_hero",
+    "act2_work",
+    "act3_bring",
+    "signal_cards",
+    "direct_cta",
+    "footer"
+  ],
+
+  "section_config": {
+    "act1_hero": {
+      "include_signals_inline": true,
+      "signals_position": "below_philosophy"
+    },
+    "signal_cards": {
+      "standalone": false,
+      "note": "Signals are injected inline into act1_hero when include_signals_inline is true. signal_cards section is skipped."
+    },
+    "act2_work": {
+      "max_works": 3
+    },
+    "act3_bring": {
+      "show_credibility_anchors": false,
+      "note": "Credibility anchors are in the brief for codegen context. They do not render on the page."
+    }
+  },
+
+  "slot_map": {
+    "act1_eyebrow":    "01 — Who I Am",
+    "act1_heading":    "brief.act1_who_i_am → identity.name from profile.json",
+    "act2_eyebrow":    "02 — What I've Done",
+    "act2_heading":    "Work that's relevant here",
+    "act3_eyebrow":    "03 — What I'll Bring",
+    "act3_heading":    "The first 90 days",
+    "signals_eyebrow": ""
+  }
+}

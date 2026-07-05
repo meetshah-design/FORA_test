@@ -1,0 +1,129 @@
+<!-- FORA — act3_bring.html -->
+<!-- Slot-based. Codegen fills all {{slots}} based on content_brief.json act3_what_ill_bring. -->
+<!--
+  SLOTS:
+  {{act3_eyebrow}}       — e.g. "03 — What I'll Bring"
+  {{act3_heading}}       — short heading for this section
+  {{act3_intro_line}}    — one sentence from brief.act3_what_ill_bring.intro_line
+  {{act3_day15_title}}   — brief.act3_what_ill_bring.day_15.title
+  {{act3_day15_body}}    — brief.act3_what_ill_bring.day_15.body
+  {{act3_day30_title}}   — brief.act3_what_ill_bring.day_30.title
+  {{act3_day30_body}}    — brief.act3_what_ill_bring.day_30.body
+  {{act3_day90_title}}   — brief.act3_what_ill_bring.day_90.title
+  {{act3_day90_body}}    — brief.act3_what_ill_bring.day_90.body
+-->
+
+<section class="fora-act3">
+  <div class="fora-act3__inner">
+
+    <span class="fora-eyebrow">{{act3_eyebrow}}</span>
+    <h2 class="fora-section-heading">{{act3_heading}}</h2>
+    <p class="fora-section-intro">{{act3_intro_line}}</p>
+
+    <div class="fora-act3__grid">
+
+      <div class="fora-day-card">
+        <div class="fora-day-card__header">
+          <span class="fora-day-card__label">Day 15</span>
+          <span class="fora-day-card__title">{{act3_day15_title}}</span>
+        </div>
+        <div class="fora-day-card__body">
+          <p>{{act3_day15_body}}</p>
+        </div>
+      </div>
+
+      <div class="fora-day-card">
+        <div class="fora-day-card__header">
+          <span class="fora-day-card__label">Day 30</span>
+          <span class="fora-day-card__title">{{act3_day30_title}}</span>
+        </div>
+        <div class="fora-day-card__body">
+          <p>{{act3_day30_body}}</p>
+        </div>
+      </div>
+
+      <div class="fora-day-card">
+        <div class="fora-day-card__header">
+          <span class="fora-day-card__label">Day 90</span>
+          <span class="fora-day-card__title">{{act3_day90_title}}</span>
+        </div>
+        <div class="fora-day-card__body">
+          <p>{{act3_day90_body}}</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+.fora-act3 {
+  padding: var(--space-7) 0;
+  border-top: var(--border);
+}
+.fora-act3__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.fora-act3__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  background: var(--color-border);
+  border: var(--border);
+  margin-top: var(--space-4);
+  max-width: 900px;
+}
+.fora-day-card {
+  background: var(--color-bg);
+}
+.fora-day-card__header {
+  background: var(--color-surface);
+  border-bottom: var(--border);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fora-day-card__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.fora-day-card__title {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink);
+  line-height: 1.4;
+}
+.fora-day-card__body {
+  padding: 16px 20px;
+}
+.fora-day-card__body p {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--color-mid);
+  line-height: 1.7;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .fora-act3__grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .fora-act3 {
+    padding: var(--space-5) 0;
+  }
+  .fora-act3__inner {
+    padding: 0 24px;
+  }
+}
+</style>

@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "id": "work-first",
+    "name": "Work First",
+    "description": "Leads with proof of work before identity. The work speaks first, then who you are contextualises it.",
+    "best_for": "Senior IC roles. Research-heavy or technically rigorous roles. Companies with an engineering or craft culture where showing is more credible than telling. Roles where the JD lists specific outputs expected."
+  },
+
+  "section_order": [
+    "nav",
+    "act2_work",
+    "act1_hero",
+    "act3_bring",
+    "signal_cards",
+    "direct_cta",
+    "footer"
+  ],
+
+  "section_config": {
+    "act2_work": {
+      "max_works": 3,
+      "note": "Leads the page. Codegen should open act2 with a strong framing line — no preamble."
+    },
+    "act1_hero": {
+      "include_signals_inline": true,
+      "signals_position": "below_philosophy",
+      "note": "Comes second. The heading should feel like context for the work above, not an introduction."
+    },
+    "signal_cards": {
+      "standalone": false
+    },
+    "act3_bring": {
+      "show_credibility_anchors": false
+    }
+  },
+
+  "slot_map": {
+    "act2_eyebrow":    "01 — The Work",
+    "act2_heading":    "What I've shipped",
+    "act1_eyebrow":    "02 — Who I Am",
+    "act1_heading":    "brief.act1_who_i_am → identity.name from profile.json",
+    "act3_eyebrow":    "03 — What I'll Bring",
+    "act3_heading":    "The first 90 days",
+    "signals_eyebrow": ""
+  }
+}

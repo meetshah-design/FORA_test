@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "id": "single-statement",
+    "name": "Single Statement",
+    "description": "Minimal. One strong positioning statement, one case study, one set of commitments, one CTA. Nothing extra.",
+    "best_for": "Design-forward or taste-conscious companies where restraint is itself a signal. Leadership roles. Situations where the brief is extremely strong on one story and adding more would dilute it. Also useful when applying to companies with very clean, minimal brand identities."
+  },
+
+  "section_order": [
+    "nav",
+    "act1_hero",
+    "act2_work",
+    "act3_bring",
+    "direct_cta",
+    "footer"
+  ],
+
+  "section_config": {
+    "act1_hero": {
+      "include_signals_inline": false,
+      "note": "No signal grid in this template. The positioning line and philosophy note carry act1 alone. Keep it spare."
+    },
+    "act2_work": {
+      "max_works": 1,
+      "note": "One work only. Codegen should pick the single strongest match from the brief works[] array — order 1. The framing angle carries more weight when there's only one story."
+    },
+    "signal_cards": {
+      "standalone": false,
+      "note": "Signal cards are excluded from this template entirely."
+    },
+    "act3_bring": {
+      "show_credibility_anchors": false
+    }
+  },
+
+  "slot_map": {
+    "act1_eyebrow":    "",
+    "act1_heading":    "brief.act1_who_i_am → positioning_line (not name — the statement is the heading)",
+    "act2_eyebrow":    "The work",
+    "act2_heading":    "",
+    "act3_eyebrow":    "The first 90 days",
+    "act3_heading":    "",
+    "signals_eyebrow": ""
+  }
+}

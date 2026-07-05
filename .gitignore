@@ -2,24 +2,41 @@
 .env
 .env.local
 
-# Output (generated per application — not committed)
+# ── PERSONAL FILES (local only — never committed) ──────────────────────────
+# Your actual profile — the template is committed, your data is not
+profile/profile.json
+
+# Your actual design system — the example is committed, yours is not
+design-system/default.md
+
+# Your actual application briefs — example-brief.json is committed, yours are not
+briefs/*.json
+!briefs/example-brief.json
+
+# Your application history — schema file is committed, your data is not
+applications/applications.json
+
+# Run state files (local only)
+run.json
+
+# ── GENERATED OUTPUT (never committed) ────────────────────────────────────
 output/
 
-# Design system overrides (personal, not shared)
+# ── DESIGN SYSTEM PERSONAL OVERRIDES ──────────────────────────────────────
 design-system/user.css
 
-# Node
+# ── NODE ───────────────────────────────────────────────────────────────────
 node_modules/
 package-lock.json
 
-# OS
+# ── OS ─────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Editor
+# ── EDITOR ─────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 
-# Logs
+# ── LOGS ───────────────────────────────────────────────────────────────────
 *.log
 npm-debug.log*

@@ -1,0 +1,101 @@
+{
+  "_readme": "This is an example content_brief.json showing the full schema. It is committed to the repo as a reference. Your real briefs go in briefs/[slug].json and are gitignored. This file is never used by generate.js — it is documentation only.",
+
+  "_meta": {
+    "schema_version": "2.1.0",
+    "generated": "2025-01-15",
+    "company": "Acme Corp",
+    "role": "Senior Product Designer",
+    "jd_url": "https://acme.com/jobs/senior-product-designer",
+    "confidence_score": 82,
+    "template_id": "three-act",
+    "design_system": "own",
+    "company_ds_url": null,
+    "company_logo_url": "https://logo.clearbit.com/acme.com",
+    "company_primary_color": null,
+    "posthog_event_tag": "acme-senior-product-designer"
+  },
+
+  "opportunity_model": {
+    "company_stage": "Series B — scaling a proven product, not 0-to-1. Role likely sits between craft and coordination.",
+    "design_maturity": "Emerging — JD mentions 'building the design system' and 'first design hire on the growth team', signals design is respected but not yet structured.",
+    "hiring_signal": "First designer embedded in a growth pod. They're not replacing anyone — they're adding design to a team that's been shipping without it.",
+    "cultural_tone": "Builder-first — JD uses 'ship', 'iterate', 'experiment' more than 'research' or 'process'. Velocity is the signal.",
+    "recommended_positioning": "Designer who ships — frames work around decisions made and outcomes reached, not process followed."
+  },
+
+  "static_wrapper": {
+    "nav_badge": "For Acme",
+    "nav_portfolio_url": "https://yourportfolio.com"
+  },
+
+  "act1_who_i_am": {
+    "emphasis": "builder",
+    "positioning_line": "I design systems that compound — the kind that make the next feature faster to ship than the last.",
+    "philosophy_note": "Good design isn't invisible. It's legible. It tells you what it does, why it's here, and what comes next.",
+    "philosophy_note_source": "core_belief"
+  },
+
+  "act2_what_ive_done": {
+    "intro_line": "Three projects where the constraint made the work better.",
+    "works": [
+      {
+        "order": 1,
+        "source_id": "prevco-design-system",
+        "title": "Design system from scratch, 0 to shipped",
+        "framing_angle": "Built for a growth team with no prior design infrastructure — mirrors Acme's current situation exactly.",
+        "decision_to_surface": "Chose token-first architecture over component-first so eng could adopt incrementally without a rewrite.",
+        "outcome_to_surface": "Reduced design-to-dev handoff time by 60% within 3 months. Team shipped 2x faster in Q3.",
+        "section_format": "case_study_link",
+        "nda_note": null
+      },
+      {
+        "order": 2,
+        "source_id": "activation-flow-redesign",
+        "title": "Activation flow — from 22% to 41%",
+        "framing_angle": "Growth pod work. Tight feedback loop between design, data, and product.",
+        "decision_to_surface": "Removed the 'aha moment' gate and let users reach value before asking for commitment.",
+        "outcome_to_surface": "Activation rate doubled in 6 weeks. Became the model for onboarding across 3 other product areas.",
+        "section_format": "signal_card",
+        "nda_note": null
+      },
+      {
+        "order": 3,
+        "source_id": "unlaunched-b2b-product",
+        "title": "0-to-1 B2B product design (NDA)",
+        "framing_angle": "Can speak to the type of problem and the design decisions made, not the company or product name.",
+        "decision_to_surface": "Structured the information architecture around the buyer's mental model, not the company's internal taxonomy.",
+        "outcome_to_surface": "Product passed internal review and entered beta. Cannot share further detail.",
+        "section_format": "timeline_entry",
+        "nda_note": "Reference as 'a B2B product design engagement in 2023'. Do not name the company or show visuals. Can describe the problem type (enterprise onboarding) and the decision made."
+      }
+    ]
+  },
+
+  "act3_what_ill_bring": {
+    "intro_line": "What the first 90 days actually look like — specific, not aspirational.",
+    "day_15": {
+      "title": "Map the terrain",
+      "body": "Audit the current growth funnel end-to-end: flows, drop-offs, existing components, anything the team considers debt. Not to fix it yet — to understand what the team is working around and why. I'll produce a single shared document that becomes the reference for every design decision in month one.",
+      "credibility_anchor": "prevco-design-system audit phase — same approach, different scale."
+    },
+    "day_30": {
+      "title": "First shipped contribution",
+      "body": "One real thing shipped in collaboration with the growth pod. Scoped small enough to ship clean but meaningful enough to demonstrate how I work — how I handle edge cases, how I hand off to eng, how I communicate decisions. The goal is a working pattern, not just a feature.",
+      "credibility_anchor": "activation-flow-redesign first sprint — first output in week 3."
+    },
+    "day_90": {
+      "title": "Foundation for the next hire",
+      "body": "By day 90, there should be a design system starter, a documented component library however small, and a clear picture of where the product's visual and interaction debt lives. The measure of this isn't what I shipped — it's whether the next designer can onboard in a day.",
+      "credibility_anchor": "Every design system project — this is the compounding outcome I always build toward."
+    }
+  },
+
+  "cold_message": {
+    "hook": "I saw the growth pod designer role — building design infrastructure on a team that's been shipping without it is exactly the kind of constraint I do my best work in.",
+    "body": "I put together a page that walks through how I'd approach the first 90 days, and a couple of projects that are closest to what you're describing. Worth 5 minutes if you're still building out the shortlist.",
+    "sign_off": "Alex"
+  },
+
+  "tone_notes": "Acme's JD is direct and low-jargon. Match that register — no 'leverage', no 'holistic', no 'stakeholders'. Write like a peer, not a candidate."
+}

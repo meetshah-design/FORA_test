@@ -1,0 +1,147 @@
+{
+  "_meta": {
+    "schema_version": "1.1.0",
+    "owner": "YOUR NAME",
+    "purpose": "Core memory file for FORA. This is the source of truth the brainstorm prompt and code generator read from. Every fact on a deployed landing page must trace back to this file. Do not surface anything not explicitly present here.",
+    "pipeline": "FORA — an agentic pipeline that reads this file, runs a narrative brainstorm per opportunity, and generates personalised application landing pages.",
+    "instructions_for_brainstorm_agent": "Read this file fully before producing a content brief. When selecting which stories, signals, and stats to surface, match them to the JD signals provided. Respect the nda_sensitive and unlaunched flags — use the framing_guidance field on each case study to handle sensitive items. Never fabricate details not present in this file. For unlaunched work, prefer framing the story around the decision and process rather than the shipped outcome.",
+    "application_history_note": "Application history lives in applications/applications.json — not in this file. This file is career knowledge only.",
+    "instructions_for_filling": "Fill every field honestly. Vague entries produce vague pages. The more specific you are — naming the product, the decision, the constraint, the outcome — the better the generated page will be. Fields marked REQUIRED must be filled. Fields marked OPTIONAL can be left as null."
+  },
+
+  "identity": {
+    "name": "YOUR FULL NAME",
+    "title": "YOUR CURRENT TITLE",
+    "tagline": "One sentence. Your professional point of view. Not a job title. What you believe about your work.",
+    "years_of_experience": 0,
+    "based_in": "City, Country",
+    "open_to_relocation": false,
+    "relocation_preference": [],
+    "contact": {
+      "email": "you@yourdomain.com",
+      "portfolio": "https://yourportfolio.com",
+      "linkedin": "https://linkedin.com/in/yourhandle"
+    },
+    "positioning": "2–3 sentences. How you operate. What makes your career arc different from someone with the same job titles. Write in first person. Be specific about what you've built and the context you built it in.",
+    "industries": ["List industries you've worked in"],
+    "core_skills": [
+      "List your actual skills — not generic ones",
+      "Name specific methodologies, systems, or approaches",
+      "Only include what you can back up with a story"
+    ],
+    "tools": ["Figma", "List tools you actually use daily"],
+    "working_style": [
+      "How you prefer to work",
+      "Communication style",
+      "Research approach",
+      "Collaboration style"
+    ]
+  },
+
+  "philosophy": {
+    "design_thinking": "One or two sentences on how you approach design problems. Your actual view — not a textbook answer.",
+    "on_ai": "Optional. Your relationship with AI tools in your workflow.",
+    "on_systems": "Optional. Your view on design systems, if relevant to your work.",
+    "personal_philosophy": "Optional. A belief or framework that shapes how you work. Specific is better than generic.",
+    "on_building": "Optional. Your relationship with building — products, teams, processes."
+  },
+
+  "career": [
+    {
+      "id": "role-slug-company",
+      "role": "Your Title",
+      "company": "Company Name",
+      "company_description": "One sentence. What the company does, its stage, and domain.",
+      "location": "City, Country (or Remote)",
+      "period": "YYYY — YYYY",
+      "type": "Full-time | Contract | Freelance | Founding role",
+      "nda_sensitive": false,
+      "unlaunched": false,
+      "unlaunched_note": "If unlaunched: explain why. Was it regulatory? Company decision? Still in progress? This context helps the brainstorm agent frame it correctly.",
+      "framing_note": "Optional. Specific instructions to the brainstorm agent on how to present this role. Use this for nuance that isn't captured in the structured fields.",
+      "headline_story": "2–3 sentences. The most important thing about this role. What you walked into, what you built, what changed.",
+      "key_decisions": [
+        {
+          "decision": "A specific decision you made",
+          "rationale": "Why you made it — the constraint, the insight, the trade-off",
+          "outcome": "What happened. Specific and concrete."
+        }
+      ],
+      "what_was_built": [
+        "List of specific outputs",
+        "Name the product, system, or process",
+        "Numbers if you have them"
+      ],
+      "key_insight": "The single most important thing you learned or proved in this role.",
+      "team_size": null,
+      "tags": ["domain", "skill", "role-type"]
+    }
+  ],
+
+  "case_studies": [
+    {
+      "id": "case-study-slug",
+      "title": "Case Study Title",
+      "company": "Company Name",
+      "display_status": "Shipped — fully presentable | Presentable — focus on process and decisions | NDA — internal use only",
+      "nda_sensitive": false,
+      "unlaunched": false,
+      "framing_guidance": "Instructions to the brainstorm agent on how to present this case study. What to lead with. What to avoid. How to handle sensitive elements.",
+      "problem": "What problem were you solving? Be specific about who had the problem and why it mattered.",
+      "insight": "The key insight that changed how you approached the problem.",
+      "process": [
+        "Step 1 — what you did",
+        "Step 2",
+        "Step 3"
+      ],
+      "outcome": "What shipped or changed. Specific. Numbers if you have them.",
+      "key_decisions": [
+        "A decision that defined the outcome"
+      ],
+      "tags": ["relevant", "tags"]
+    }
+  ],
+
+  "signals": {
+    "signal_name": {
+      "description": "What this signal says about you as a designer. One sentence.",
+      "evidence": [
+        "Specific evidence from your career that proves this signal",
+        "Name the company, product, or decision"
+      ],
+      "best_for_roles": [
+        "Types of roles where this signal is most relevant",
+        "The brainstorm agent uses this to decide which signals to surface per JD"
+      ]
+    }
+  },
+
+  "current_projects": [
+    {
+      "id": "project-slug",
+      "name": "Project Name",
+      "description": "2–3 sentences. What it is, what problem it solves, what makes it interesting.",
+      "status": "In progress | Launched | Paused",
+      "stage": "More detail on where it is and what's next.",
+      "nda_sensitive": false,
+      "tags": ["relevant", "tags"]
+    }
+  ],
+
+  "personal": {
+    "interests": ["List genuine interests — these add texture when relevant"],
+    "philosophy_anchor": "Optional. A philosophy, framework, or belief system that shapes how you work. Specific is better.",
+    "aesthetic_references": ["References that inform your visual and design aesthetic"],
+    "portfolio_aesthetic": "Describe the visual feel of your portfolio or personal brand. Fonts, colours, mood. This informs the default design system."
+  },
+
+  "tone_of_voice": {
+    "rules": [
+      "List rules for how copy about you should be written",
+      "What to avoid — filler, clichés, vague claims",
+      "What to use — specific language, sentence length, tone"
+    ],
+    "do": ["Lead with specifics", "Name the product and the decision"],
+    "dont": ["Say 'passionate about design'", "Use 'leveraged' or 'utilized'"]
+  }
+}

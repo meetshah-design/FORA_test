@@ -1,0 +1,105 @@
+<!-- FORA — act1_hero.html -->
+<!-- Slot-based. Codegen fills all {{slots}} based on content_brief.json act1_who_i_am. -->
+<!--
+  SLOTS:
+  {{act1_eyebrow}}          — e.g. "01 — Who I Am"
+  {{act1_heading}}          — designer's name or a short identity phrase
+  {{act1_positioning_line}} — the one sentence written for this company
+  {{act1_philosophy_note}}  — quote from profile.json philosophy, italic
+  {{act1_signals_html}}     — 2–4 signal cards (see signal_cards.html for format)
+                              injected inline here in act1, above the fold
+-->
+
+<section class="fora-act1">
+  <div class="fora-act1__inner">
+
+    <span class="fora-eyebrow">{{act1_eyebrow}}</span>
+    <h1 class="fora-act1__heading">{{act1_heading}}</h1>
+
+    <blockquote class="fora-act1__positioning">
+      {{act1_positioning_line}}
+    </blockquote>
+
+    <p class="fora-act1__philosophy">
+      {{act1_philosophy_note}}
+    </p>
+
+    <div class="fora-act1__signals">
+      {{act1_signals_html}}
+    </div>
+
+  </div>
+</section>
+
+<style>
+.fora-act1 {
+  padding: var(--space-7) 0 var(--space-6);
+}
+.fora-act1__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.fora-act1__heading {
+  font-family: var(--font-sans);
+  font-size: 48px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--color-ink);
+  margin: var(--space-2) 0 var(--space-3);
+  max-width: 720px;
+}
+.fora-act1__positioning {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--color-ink);
+  max-width: 560px;
+  margin: 0 0 var(--space-3) 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--color-ink);
+}
+.fora-act1__philosophy {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.75;
+  color: var(--color-mid);
+  max-width: 560px;
+  margin: 0 0 var(--space-5) 0;
+}
+.fora-act1__signals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--color-border);
+  border: var(--border);
+  max-width: 720px;
+}
+
+@media (max-width: 960px) {
+  .fora-act1__heading {
+    font-size: 40px;
+  }
+}
+@media (max-width: 640px) {
+  .fora-act1 {
+    padding: var(--space-5) 0 var(--space-5);
+  }
+  .fora-act1__inner {
+    padding: 0 24px;
+  }
+  .fora-act1__heading {
+    font-size: 32px;
+  }
+  .fora-act1__positioning {
+    font-size: 16px;
+  }
+  .fora-act1__signals {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

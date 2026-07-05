@@ -1,0 +1,136 @@
+<!-- FORA — _base.html -->
+<!-- Injected into <head> by generate.js on every assembled page. -->
+<!-- Contains: Google Fonts, CSS custom properties, global reset, shared utilities. -->
+<!-- This file is never rendered directly — it is always injected. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- DS tokens injected here by generate.js -->
+<!-- {{ds_tokens}} -->
+
+<style>
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── CSS CUSTOM PROPERTIES ── */
+/* Set from default.md tokens or company DS tokens at runtime by generate.js */
+:root {
+  /* Colors */
+  --color-bg:         #FFFFFF;
+  --color-surface:    #F7F7F5;
+  --color-border:     #E5E5E3;
+  --color-ink:        #1A1A18;
+  --color-mid:        #4A4A47;
+  --color-muted:      #8A8A85;
+  --color-accent:     #1A1A18;
+  --color-accent-soft:#F0EFE9;
+
+  /* Typography */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing (8px scale) */
+  --space-1:  8px;
+  --space-2:  16px;
+  --space-3:  24px;
+  --space-4:  32px;
+  --space-5:  48px;
+  --space-6:  64px;
+  --space-7:  96px;
+  --space-8:  128px;
+
+  /* Borders */
+  --border:        1px solid var(--color-border);
+  --border-strong: 1.5px solid var(--color-ink);
+
+  /* Radius */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+}
+
+/* ── GLOBAL ── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+/* ── SHARED UTILITIES ── */
+
+/* Eyebrow — used above every section heading */
+.fora-eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+
+/* Section heading (h2) */
+.fora-section-heading {
+  font-family: var(--font-sans);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-ink);
+  margin-bottom: var(--space-2);
+}
+
+/* Section intro paragraph */
+.fora-section-intro {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--color-mid);
+  line-height: 1.75;
+  max-width: 600px;
+  margin: 0;
+}
+
+/* Divider */
+.fora-divider {
+  border: none;
+  border-top: var(--border);
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .fora-section-heading {
+    font-size: 28px;
+  }
+}
+@media (max-width: 640px) {
+  .fora-section-heading {
+    font-size: 24px;
+  }
+}
+</style>
