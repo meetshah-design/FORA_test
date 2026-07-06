@@ -33,6 +33,9 @@ Result: https://fora-pages.vercel.app/company-role
 
 Most of the time is Step 2 — building your profile. That's intentional. The profile is the foundation everything else builds on. Do it once, reuse it forever.
 
+Throughout this guide, steps are labelled by where you're working:
+`[Terminal]` `[Browser]` `[Editor]`
+
 ---
 
 ## Before you start
@@ -51,6 +54,7 @@ For automated codegen and deploy (optional):
 ## Step 1 — Clone the repo
 *~2 min*
 
+`[Terminal]`
 ```bash
 git clone https://github.com/meetshahco/FORA.git
 cd FORA
@@ -70,18 +74,21 @@ npm install
 
 Your profile is your private career knowledge base. It lives only on your machine and is the source of truth for every application you generate. Build it once, update it as your work grows.
 
-**Open any AI chat** — Claude.ai, ChatGPT, Gemini, Cursor, whatever you use.
+`[Browser]` Open any AI chat — Claude.ai, ChatGPT, Gemini, Cursor, whatever you use.
 
-Paste the contents of `prompts/profile-builder-prompt.md` into the chat, then share your raw materials — your resume, LinkedIn export, case study notes, anything that documents your work. The more you share, the richer the profile.
+`[Editor]` Open `prompts/profile-builder-prompt.md` and copy the full contents.
 
-The assistant will ask a few questions, draft a complete `profile.json`, and walk you through reviewing it section by section.
+`[Browser]` Paste it into your AI chat, then share your raw materials — your resume, LinkedIn export, case study notes, anything that documents your work. The more you share, the richer the profile. The assistant will ask a few focused questions, draft a complete `profile.json`, and walk you through reviewing it section by section.
 
-When you're happy with the output, save it:
+`[Editor]` When you're happy with the output, create the file and paste the JSON in:
 
+```
+profile/profile.json
+```
+
+`[Terminal]` Verify it exists:
 ```bash
-mkdir -p profile
-# paste the JSON output into this file
-nano profile/profile.json   # or open in any editor
+cat profile/profile.json
 ```
 
 **You should now have:**
@@ -98,14 +105,12 @@ This file is gitignored — it will never be committed or pushed.
 
 Your design system is the visual baseline for every page you generate. The default is clean, neutral, and typographic — designed to look intentional without being templated.
 
+`[Terminal]`
 ```bash
-mkdir -p design-system
-cp design-system/default.md design-system/default.md.example
-# Edit design-system/default.md to adjust colours, fonts, or spacing
-# Or leave it as-is — the defaults work well out of the box
+cp design-system/default.md.example design-system/default.md
 ```
 
-If you leave it untouched, pages use the FORA default: white background, Inter + JetBrains Mono, no shadows, border-based structure.
+`[Editor]` Open `design-system/default.md` and adjust colours, fonts, or spacing to match your personal brand. Or leave it untouched — the defaults work well out of the box.
 
 **You should now have:**
 ```
@@ -121,11 +126,12 @@ This file is gitignored — your personal DS never gets committed.
 
 FORA works without any API keys in fully manual mode. Configure this step only if you want automated codegen (`--run`) or automated deploy (`--publish`).
 
+`[Terminal]`
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and fill in what you need:
+`[Editor]` Open `.env` and fill in what you need:
 
 ```
 # For generate.js --run (automated codegen)
@@ -136,7 +142,7 @@ VERCEL_TOKEN=your_vercel_token
 VERCEL_PROJECT_NAME=fora-pages
 ```
 
-To get your Vercel token: vercel.com/account/tokens → Create Token.
+To get your Vercel token: `[Browser]` vercel.com/account/tokens → Create Token.
 
 If you're skipping automated deploy, you can use Netlify drop, GitHub Pages, or any static host — `generate.js --run` produces a plain HTML file that works anywhere.
 
@@ -152,30 +158,36 @@ If you're skipping automated deploy, you can use Netlify drop, GitHub Pages, or 
 
 Find a job description you want to apply to. Copy the URL.
 
+`[Terminal]`
 ```bash
 ./brainstorm.sh https://company.com/jobs/senior-designer
 ```
 
 This fetches the JD, assembles the brainstorm prompt with your `profile.json`, and copies everything to your clipboard.
 
-**Open any AI chat** and paste. The assistant will:
+`[Browser]` Open any AI chat and paste. The FORA brainstorm agent will:
 1. Analyse the JD and score the match against your profile
 2. Propose content for all three acts — who you are, what you've done, what you'll bring
-3. Ask for your input or refinements
-4. Lock a `content_brief.json`
+3. Ask if you have any visuals to attach (screenshots, Loom links, Figma URLs)
+4. Ask for your input or refinements
+5. Lock a `content_brief.json` and give you an assets checklist
 
-When the assistant outputs the brief, save it:
+`[Editor]` Save the brief the agent outputs:
+```
+briefs/acme-senior-designer.json
+```
 
+`[Terminal]` If the agent listed any local files in the assets checklist, drop them in:
 ```bash
-# The assistant will tell you the exact filename
-# e.g. briefs/acme-senior-designer.json
-nano briefs/acme-senior-designer.json
+# e.g. cp ~/Desktop/kwikpay-dashboard.png assets/
 ```
 
 **You should now have:**
 ```
 ✓ briefs/
     acme-senior-designer.json
+✓ assets/
+    [any local files you attached]
 ```
 
 Brief files are gitignored — they won't be committed.
@@ -187,6 +199,7 @@ Brief files are gitignored — they won't be committed.
 
 **If you have an Anthropic API key (Mode 2+3):**
 
+`[Terminal]`
 ```bash
 node generate.js --run briefs/acme-senior-designer.json
 ```
@@ -195,10 +208,11 @@ This calls the API per section, assembles your page, and writes it locally.
 
 **If you're going fully manual (Mode 1):**
 
-Open any AI chat. Paste `prompts/codegen-prompt.md`, then paste the contents of your brief. Ask the assistant to generate each section one at a time. Assemble the HTML manually into `output/acme-senior-designer/index.html`.
+`[Browser]` Open any AI chat. Paste `prompts/codegen-prompt.md`, then paste the contents of your brief. Ask the assistant to generate each section one at a time.
 
-**Preview your page:**
+`[Editor]` Assemble the HTML into `output/acme-senior-designer/index.html`.
 
+`[Terminal]` Preview your page:
 ```bash
 open output/acme-senior-designer/index.html
 ```
@@ -210,7 +224,7 @@ open output/acme-senior-designer/index.html
         index.html
 ```
 
-If something looks off, edit the brief and re-run. The brief is the source of truth — `generate.js` is deterministic given the same brief.
+If something looks off, edit the brief and re-run. The brief is the source of truth.
 
 ---
 
@@ -219,17 +233,18 @@ If something looks off, edit the brief and re-run. The brief is the source of tr
 
 **Vercel (automated):**
 
+`[Terminal]`
 ```bash
 node generate.js --publish briefs/acme-senior-designer.json
 ```
 
 Returns a live URL: `https://fora-pages.vercel.app/acme-senior-designer`
 
-Your Vercel project must exist before the first deploy — create it once at vercel.com/new (empty project, no framework, no git connection needed).
+Your Vercel project must exist before the first deploy — `[Browser]` create it once at vercel.com/new (empty project, no framework, no git connection needed).
 
 **Netlify drop (manual, free):**
 
-Go to [app.netlify.com/drop](https://app.netlify.com/drop), drag your `output/acme-senior-designer/` folder in. Done.
+`[Browser]` Go to [app.netlify.com/drop](https://app.netlify.com/drop), drag your `output/acme-senior-designer/` folder in. Done.
 
 **GitHub Pages, Cloudflare Pages, or any static host:**
 
@@ -244,29 +259,37 @@ The output is a single `index.html` with no external dependencies. It works on a
 
 ## What's next
 
-**Apply again.** Run `brainstorm.sh` with a new JD. Your profile stays — each application takes 15–20 minutes once you're set up.
+**Apply again.** `[Terminal]` Run `brainstorm.sh` with a new JD. Your profile stays — each application takes 15–20 minutes once you're set up.
 
-**Update your profile.** When you ship new work, open `profile/profile.json` and update the relevant entry. Or re-run `profile-builder-prompt.md` with your current profile + what changed — the assistant handles the merge.
+**Update your profile.** When you ship new work, `[Editor]` open `profile/profile.json` and update the relevant entry. Or `[Browser]` re-run `profile-builder-prompt.md` with your current profile + what changed — the assistant handles the merge.
 
-**Customise your design system.** Edit `design-system/default.md` to adjust colours, typography, or spacing. Changes apply to every page you generate from that point.
+**Customise your design system.** `[Editor]` Edit `design-system/default.md` to adjust colours, typography, or spacing. Changes apply to every page you generate from that point.
+
+**Track your applications.** Application history tracking is coming in V1 — a local `applications/applications.json` that logs every brief you've run, every page you've deployed, and every response. The system gets richer with every application.
 
 ---
 
 ## Troubleshooting
 
 **`brainstorm.sh` says permission denied**
+
+`[Terminal]`
 ```bash
 chmod +x brainstorm.sh
 ```
 
 **generate.js fails with API error**
-Check your `ANTHROPIC_API_KEY` in `.env`. Make sure there are no extra spaces or quotes.
+
+`[Editor]` Check your `ANTHROPIC_API_KEY` in `.env`. Make sure there are no extra spaces or quotes.
 
 **Vercel deploy fails**
-Check `VERCEL_TOKEN` and `VERCEL_PROJECT_NAME` in `.env`. Your Vercel project must exist before the first deploy.
+
+`[Editor]` Check `VERCEL_TOKEN` and `VERCEL_PROJECT_NAME` in `.env`. Your Vercel project must exist before the first deploy.
 
 **The page looks unstyled**
+
 Your `design-system/default.md` is missing. See Step 3.
 
 **brainstorm.sh fetched an empty or broken JD**
-Some job boards block automated fetches. Fall back to Option B: copy the JD text manually, open an AI chat, paste `prompts/brainstorm-prompt.md` + your `profile.json` + the JD text directly.
+
+Some job boards block automated fetches. `[Browser]` Copy the JD text manually, open your AI chat, and paste `prompts/brainstorm-prompt.md` + your `profile.json` + the JD text directly.
