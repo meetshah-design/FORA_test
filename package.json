@@ -1,0 +1,15 @@
+{
+  "name": "fora",
+  "version": "0.1.0",
+  "description": "Agentic pipeline that turns a job description into a personalised application landing page",
+  "main": "generate.js",
+  "scripts": {
+    "generate": "node generate.js",
+    "brainstorm": "bash brainstorm.sh"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
