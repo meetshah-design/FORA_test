@@ -105,11 +105,25 @@ This file is gitignored — it will never be committed or pushed.
 
 Your design system is the visual baseline for every page you generate. The default is clean, neutral, and typographic — designed to look intentional without being templated.
 
-`[Editor]` Open `design-system/default.md` and adjust colours, fonts, or spacing to match your personal brand. Or leave it untouched — the defaults work well out of the box.
+**Option A — Use the defaults (recommended for your first run)**
+Skip this step entirely. The defaults work well out of the box. Come back to this once you've generated your first page and know what you want to change.
+
+**Option B — Configure it to match your personal brand**
+`[Browser]` Open any AI chat. Paste `prompts/ds-builder-prompt.md`.
+
+Then share any combination of:
+- Your portfolio URL
+- A link to your public design system or Storybook
+- A DS file (Figma tokens JSON, CSS variables, anything)
+- A plain description of your visual style
+
+The assistant extracts your visual language, asks a few focused questions, and outputs a complete configured `design-system/default.md`. Save it and you're done.
+
+`[Editor]` Or skip the AI and edit `design-system/default.md` directly — it's a plain markdown file with annotated tokens.
 
 **You should now have:**
 ```
-✓ design-system/default.md  (already in the repo — just edit it)
+✓ design-system/default.md  (already in the repo — edit or leave as-is)
 ```
 
 ---
