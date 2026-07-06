@@ -137,19 +137,23 @@ Anthropic and Vercel are independent. You only need what your mode requires.
 
 `[Browser]` Go to [github.com/meetshahco/FORA](https://github.com/meetshahco/FORA) and click **Fork** (top right). This creates your own copy at `github.com/yourhandle/FORA`. You only need to do this once.
 
-`[Terminal]` Clone your fork to your machine:
+`[Terminal]` Clone your fork and run the setup script:
 ```bash
 git clone https://github.com/yourhandle/FORA.git
 cd FORA
-npm install
+chmod +x setup.sh brainstorm.sh
+./setup.sh
 ```
 
 Replace `yourhandle` with your GitHub username.
 
+`setup.sh` is a re-runnable health check. It verifies your environment, walks you through mode selection and API keys, and tells you exactly what's missing. Run it anytime — first setup, after changing keys, or on a new machine.
+
 **You should now have:**
 ```
 ✓ FORA/ folder on your machine
-✓ node_modules/ installed
+✓ Node version confirmed
+✓ Mode selected and .env written (if using Mode 2B/3)
 ```
 
 ---

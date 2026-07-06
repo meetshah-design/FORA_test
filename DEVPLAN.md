@@ -33,6 +33,7 @@ the repo, fill their profile, run the brainstorm, and have a live URL — in one
 | `templates/*.json` | ✓ Built (3 templates) |
 | `generate.js` | ✓ Built (`--run`, `--deploy`, `--publish`) |
 | `brainstorm.sh` | ✓ Built |
+| `setup.sh` | ✓ Built |
 | `.env.example` | ✓ Built |
 | `README.md` | ✓ Built |
 | `SETUP.md` | ✓ Built |
