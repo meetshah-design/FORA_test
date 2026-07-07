@@ -3,9 +3,10 @@
  * FORA — generate.js
  * Version: 1.0.0
  *
- * Two modes:
- *   node generate.js --run     briefs/[slug].json   → assembles HTML to output/
- *   node generate.js --publish briefs/[slug].json   → assembles + deploys to Vercel
+ * Three modes:
+ *   node generate.js --run     briefs/[slug].json   → assembles HTML to output/  (needs Anthropic API)
+ *   node generate.js --publish briefs/[slug].json   → assembles + deploys to Vercel  (needs Anthropic + Vercel)
+ *   node generate.js --deploy  briefs/[slug].json   → deploys existing output/ to Vercel  (needs Vercel only)
  *
  * Internal modules (in order of execution):
  *   1. Planner        — reads brief + template, builds execution plan in memory
@@ -474,18 +475,23 @@ async function main() {
   const mode   = args[0];
   const briefArg = args[1];
 
-  if (!mode || !briefArg || !['--run', '--publish'].includes(mode)) {
+  if (!mode || !briefArg || !['--run', '--publish', '--deploy'].includes(mode)) {
     console.log(`
 ${BOLD}FORA — generate.js${RESET}
 
 Usage:
-  node generate.js --run     briefs/[slug].json   # assemble page locally
-  node generate.js --publish briefs/[slug].json   # assemble + deploy to Vercel
+  node generate.js --run     briefs/[slug].json   # assemble page locally       (needs Anthropic API key)
+  node generate.js --publish briefs/[slug].json   # assemble + deploy to Vercel (needs Anthropic + Vercel)
+  node generate.js --deploy  briefs/[slug].json   # deploy existing output/     (needs Vercel only — no Anthropic key)
+
+  --deploy is for Mode 2B: you generated the HTML manually in an AI chat,
+  saved it to output/[slug]/index.html, and now want to deploy without an API key.
 `);
     process.exit(0);
   }
 
   const publish = mode === '--publish';
+  const deployOnly = mode === '--deploy';
 
   console.log('');
   console.log(`${BOLD}FORA — ${publish ? 'Generate + Publish' : 'Generate'}${RESET}`);
@@ -514,6 +520,62 @@ Usage:
   // ── Module 1: Planner ────────────────────────────────────────────────────
   const plan = planner(brief, templateJson);
   dim(`  Sections: ${plan.sections.map(s => s.id).join(' → ')}`);
+
+  // ── --deploy shortcut: skip codegen, deploy existing HTML ────────────────
+  if (deployOnly) {
+    const outputFile = path.join(__dirname, 'output', plan.slug, 'index.html');
+    if (!fs.existsSync(outputFile)) {
+      fail(`No generated page found at output/${plan.slug}/index.html
+
+Generate the HTML first — either:
+  Mode 1 (manual): paste prompts/codegen-prompt.md + your brief into any AI chat,
+                   assemble the sections, save to output/${plan.slug}/index.html
+  Mode 2 (auto):   node generate.js --run ${briefArg}`);
+    }
+
+    const htmlContent = fs.readFileSync(outputFile, 'utf8');
+    ok(`Page loaded from output/${plan.slug}/index.html`);
+
+    try {
+      const liveUrl = await publisher(plan.slug, htmlContent);
+      ok(`Deployed → ${liveUrl}`);
+
+      // Log to applications.json
+      const appsPath = path.join(__dirname, 'applications', 'applications.json');
+      let apps = [];
+      if (fs.existsSync(appsPath)) {
+        try { apps = JSON.parse(fs.readFileSync(appsPath, 'utf8')); } catch {}
+      }
+      apps.push({
+        company:      brief._meta.company,
+        role:         brief._meta.role,
+        slug:         plan.slug,
+        url:          liveUrl,
+        published_at: new Date().toISOString(),
+        confidence:   brief._meta.confidence_score || null,
+        template:     brief._meta.template_id,
+        mode:         '2b-manual-codegen',
+        prompt_versions: {
+          brainstorm: brief._meta.schema_version || null,
+          codegen:    'manual',
+        },
+      });
+      fs.mkdirSync(path.dirname(appsPath), { recursive: true });
+      fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');
+      ok(`Logged → applications/applications.json (${apps.length} total)`);
+
+      console.log('');
+      console.log(`${BOLD}Live URL:${RESET}`);
+      console.log(`  ${GREEN}${liveUrl}${RESET}`);
+      console.log('');
+      console.log('Copy this into your cold message and send it.');
+    } catch (e) {
+      fail(`Deploy failed: ${e.message}`);
+    }
+
+    console.log('');
+    return;
+  }
 
   // ── Module 2: Knowledge Loader ───────────────────────────────────────────
   const profile = knowledgeLoader();
@@ -576,6 +638,7 @@ Usage:
         published_at: new Date().toISOString(),
         confidence:   brief._meta.confidence_score || null,
         template:     brief._meta.template_id,
+        mode:         '3-auto',
         prompt_versions: {
           brainstorm: brief._meta.schema_version || null,
           codegen:    'codegen-v1',

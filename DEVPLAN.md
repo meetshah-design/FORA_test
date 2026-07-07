@@ -31,7 +31,7 @@ the repo, fill their profile, run the brainstorm, and have a live URL — in one
 | `design-system/default.md` | ✓ Built |
 | `templates/sections/*.html` | ✓ Built (8 files) |
 | `templates/*.json` | ✓ Built (3 templates) |
-| `generate.js` | ✓ Built |
+| `generate.js` | ✓ Built (`--run`, `--deploy`, `--publish`) |
 | `brainstorm.sh` | ✓ Built |
 | `.env.example` | ✓ Built |
 | `README.md` | ✓ Built |
@@ -74,15 +74,21 @@ Slot-based (codegen fills `{{slot}}` placeholders):
 
 **`generate.js`** — the pipeline, two modes
 
-`--run briefs/[slug].json`
+`--run briefs/[slug].json` *(needs Anthropic API key)*
 ```
-read brief → load default.md (or fetch company DS) → call Anthropic API per section
+read brief → load default.md → call Anthropic API per section
 → assemble full HTML → write output/[slug]/index.html
 ```
 
-`--publish briefs/[slug].json`
+`--deploy briefs/[slug].json` *(needs Vercel token only — no Anthropic key)*
 ```
---run + deploy to Vercel → return live URL
+read existing output/[slug]/index.html → deploy to Vercel → log to applications.json
+```
+Use this after generating HTML manually in an AI chat (Mode 2B).
+
+`--publish briefs/[slug].json` *(needs Anthropic + Vercel)*
+```
+--run + --deploy in one command → return live URL
 ```
 
 Media support: base64-encodes local images (jpeg/png/gif), embeds Loom/YouTube/Figma

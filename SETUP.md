@@ -40,26 +40,40 @@ FORA works in three modes. You don't need an API key to get a real output.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  MODE 1 — Manual                    FREE, zero setup                 │
+│  MODE 1 — Fully manual              FREE, zero API keys              │
 │                                                                      │
 │  brainstorm.sh → paste into AI chat → save brief                     │
 │  paste codegen-prompt.md + brief into AI chat → copy HTML manually   │
+│  drag output folder to Netlify drop → live URL                       │
 │                                                                      │
-│  Best for: trying FORA for the first time, no API key yet            │
+│  Best for: trying FORA for the first time, no API keys yet           │
 ├──────────────────────────────────────────────────────────────────────┤
-│  MODE 2 — Automated codegen         Needs: Anthropic API key         │
+│  MODE 2A — Automated codegen        Needs: Anthropic API key         │
 │                                                                      │
 │  brainstorm.sh → paste into AI chat → save brief                     │
 │  node generate.js --run brief.json → HTML written automatically      │
+│  drag output folder to Netlify drop → live URL                       │
 │                                                                      │
-│  Best for: regular use, saves 10–15 min per application              │
+│  Best for: regular use, no Vercel account                            │
 ├──────────────────────────────────────────────────────────────────────┤
-│  MODE 3 — Automated codegen + deploy  Needs: Anthropic + Vercel      │
+│  MODE 2B — Manual codegen + auto deploy   Needs: Vercel only ★       │
+│                                                                      │
+│  brainstorm.sh → paste into AI chat → save brief                     │
+│  paste codegen-prompt.md + brief into AI chat → save HTML manually   │
+│  node generate.js --deploy brief.json → live URL returned            │
+│                                                                      │
+│  Best for: designers who prefer AI chat for generation but want      │
+│  a permanent URL without drag-and-drop. Zero Anthropic cost.         │
+├──────────────────────────────────────────────────────────────────────┤
+│  MODE 3 — Fully automated           Needs: Anthropic + Vercel        │
 │                                                                      │
 │  node generate.js --publish brief.json → live URL returned           │
 │                                                                      │
 │  Best for: sending the URL in a cold message the same day            │
 └──────────────────────────────────────────────────────────────────────┘
+
+★ Mode 2B is the most practical starting point — automated deploy with zero API cost.
+  Anthropic and Vercel keys are independent. You only need what your mode requires.
 ```
 
 Steps 1–5 are the same for all modes. Steps 6–7 diverge based on mode.
@@ -88,10 +102,10 @@ Result: https://fora-pages.vercel.app/company-role
 | 1 | Fork + clone the repo | Yes | 2 min |
 | 2 | Build your profile | Yes | ~45 min |
 | 3 | Set up your design system | Optional | 5 min |
-| 4 | Configure API keys | Mode 2+3 only | 5 min |
+| 4 | Configure API keys | Mode 2A + 3 need Anthropic. Mode 2B + 3 need Vercel. | 5 min |
 | 5 | Run your first brainstorm | Yes | ~15 min |
-| 6 | Generate your page | Yes | 2–15 min |
-| 7 | Publish | Mode 3 only | 2 min |
+| 6 | Generate your page | Yes — see mode table | 2–15 min |
+| 7 | Deploy | Mode 2B + 3 only | 2 min |
 
 Most of the time is Step 2 — building your profile. That's intentional. The profile is the foundation everything else builds on. Do it once, reuse it forever.
 
@@ -107,12 +121,14 @@ Throughout this guide, steps are labelled by where you're working:
 - Your resume, LinkedIn export, or any career materials (for Step 2)
 - An AI chat open — Claude.ai, ChatGPT, Gemini, or any model you prefer
 
-**Mode 2 only — automated codegen:**
+**Mode 2A + 3 only — automated codegen:**
 - An Anthropic API key — [console.anthropic.com](https://console.anthropic.com/settings/keys)
 
-**Mode 3 only — automated deploy:**
-- An Anthropic API key (above)
+**Mode 2B + 3 only — automated deploy:**
 - A Vercel account — [vercel.com](https://vercel.com) (free tier works)
+- A Vercel token — [vercel.com/account/tokens](https://vercel.com/account/tokens)
+
+Anthropic and Vercel are independent. You only need what your mode requires.
 
 ---
 
@@ -291,9 +307,9 @@ Brief files are gitignored — they won't be committed.
 ---
 
 ## Step 6 — Generate your page
-*~2 min*
+*~2 min (Mode 2A + 3) or ~15 min (Mode 1 + 2B)*
 
-**If you have an Anthropic API key (Mode 2+3):**
+**Mode 2A + 3 — Automated codegen (Anthropic API key required):**
 
 `[Terminal]`
 ```bash
@@ -302,15 +318,19 @@ node generate.js --run briefs/acme-senior-designer.json
 
 This calls the API per section, assembles your page, and writes it locally.
 
-**If you're going fully manual (Mode 1):**
+**Mode 1 + 2B — Manual codegen (no Anthropic key needed):**
 
 `[Browser]` Open any AI chat. Paste `prompts/codegen-prompt.md`, then paste the contents of your brief. Ask the assistant to generate each section one at a time.
 
-`[Editor]` Assemble the HTML into `output/acme-senior-designer/index.html`.
+`[Editor]` Create the output folder and save the HTML:
+```
+output/acme-senior-designer/index.html
+```
 
 `[Terminal]` Preview your page:
 ```bash
 open output/acme-senior-designer/index.html
+# or on Windows/Linux: use the file:// path printed by generate.js --run
 ```
 
 **You should now have:**
@@ -320,31 +340,43 @@ open output/acme-senior-designer/index.html
         index.html
 ```
 
-If something looks off, edit the brief and re-run. The brief is the source of truth.
+If something looks off, edit the brief and re-run (or re-paste into AI chat). The brief is the source of truth.
 
 ---
 
-## Step 7 — Publish
-*~2 min — optional*
+## Step 7 — Deploy
+*~2 min — Mode 2B + 3 only*
 
-**Vercel (automated):**
+**Mode 2B — Manual codegen + auto deploy (Vercel, no Anthropic key):**
+
+You've already generated `output/acme-senior-designer/index.html` manually in Step 6.
+Now deploy it with one command:
+
+`[Terminal]`
+```bash
+node generate.js --deploy briefs/acme-senior-designer.json
+```
+
+Returns a live URL: `https://fora-pages.vercel.app/acme-senior-designer`
+
+**Mode 3 — Fully automated (Anthropic + Vercel):**
 
 `[Terminal]`
 ```bash
 node generate.js --publish briefs/acme-senior-designer.json
 ```
 
-Returns a live URL: `https://fora-pages.vercel.app/acme-senior-designer`
+Generates the page and deploys in one command.
 
-Your Vercel project must exist before the first deploy — `[Browser]` create it once at vercel.com/new (empty project, no framework, no git connection needed).
+**Both modes:** Your Vercel project must exist before the first deploy — `[Browser]` create it once at [vercel.com/new](https://vercel.com/new) (empty project, no framework, no git connection needed).
 
-**Netlify drop (manual, free):**
+---
 
-`[Browser]` Go to [app.netlify.com/drop](https://app.netlify.com/drop), drag your `output/acme-senior-designer/` folder in. Done.
+**No Vercel? Use Netlify drop instead (Mode 1 + 2A):**
 
-**GitHub Pages, Cloudflare Pages, or any static host:**
+`[Browser]` Go to [app.netlify.com/drop](https://app.netlify.com/drop), drag your `output/acme-senior-designer/` folder in. Done — free, no account needed.
 
-The output is a single `index.html` with no external dependencies. It works on any static host.
+The output is a single self-contained `index.html`. It works on any static host: GitHub Pages, Cloudflare Pages, S3 — anything.
 
 **You should now have:**
 ```

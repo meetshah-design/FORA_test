@@ -26,8 +26,9 @@ cd FORA
 node generate.js --run briefs/[slug].json
 open output/[slug]/index.html
 
-# Step 4 — publish (optional)
-node generate.js --publish briefs/[slug].json
+# Step 4 — deploy (optional, needs Vercel token in .env)
+node generate.js --deploy briefs/[slug].json    # deploy manually-generated HTML (no Anthropic needed)
+node generate.js --publish briefs/[slug].json   # generate + deploy in one command (needs Anthropic)
 # → https://fora-pages.vercel.app/[slug]
 ```
 
@@ -51,16 +52,19 @@ Result: a URL you can send in a cold message
 
 ## Usage modes
 
-FORA is tool-agnostic and cost-optional. Use as much or as little automation as you want.
+FORA is tool-agnostic and cost-optional. Anthropic and Vercel are independent — use only what your mode requires.
 
-**Mode 1 — Manual (zero cost, no setup)**
-Run `brainstorm.sh` (or paste manually) into any AI chat. Ask the same AI to generate HTML section by section. Deploy however you like — Netlify drop, GitHub Pages, or just email the file. No API key. No spend.
+**Mode 1 — Fully manual (zero cost, no API keys)**
+Run `brainstorm.sh` into any AI chat. Ask the same AI to generate HTML section by section using `codegen-prompt.md`. Deploy by dragging the folder to Netlify drop or any static host.
 
-**Mode 2 — Automated codegen**
-Same brainstorm flow, but `generate.js --run` handles the HTML generation for you using the Anthropic API. Requires `ANTHROPIC_API_KEY` in `.env`. Output lands in `output/` as a local file.
+**Mode 2A — Automated codegen (Anthropic key only)**
+Same brainstorm flow, but `generate.js --run` handles HTML generation automatically. No Vercel needed — deploy manually after.
 
-**Mode 3 — Fully automated**
-`generate.js --publish` generates and deploys in one command. Requires `ANTHROPIC_API_KEY` + `VERCEL_TOKEN`. Vercel is the default deploy target but you can swap it for anything — the assembled HTML is just a file.
+**Mode 2B — Manual codegen + auto deploy (Vercel key only) ★**
+Generate HTML manually in an AI chat (no Anthropic cost), then run `generate.js --deploy` to get a live URL automatically. The most practical starting point — zero API cost with a permanent URL.
+
+**Mode 3 — Fully automated (Anthropic + Vercel)**
+`generate.js --publish` generates and deploys in one command.
 
 See `.env.example` for exactly which keys each mode needs.
 
@@ -77,17 +81,17 @@ brainstorm-prompt.md + profile.json
   ▼
 content_brief.json
   │
-  ▼
-generate.js --run          ← uses Anthropic API (Mode 2+3)
-  │   or: paste codegen-prompt.md manually (Mode 1)
-  ▼
-assembled HTML page
+  ├──→ generate.js --run       ← auto codegen    (Mode 2A + 3, needs Anthropic)
+  │         ↓
+  └──→ paste codegen-prompt.md manually          (Mode 1 + 2B, no API key needed)
+            ↓
+  assembled HTML page
+            │
+  ├──→ generate.js --deploy    ← auto deploy     (Mode 2B + 3, needs Vercel)
   │
-  ▼
-generate.js --publish      ← deploys to Vercel (Mode 3)
-  │   or: deploy anywhere (Mode 1+2)
-  ▼
-live URL
+  └──→ drag to Netlify / any static host         (Mode 1 + 2A, no Vercel needed)
+            ↓
+        live URL
 ```
 
 ---
@@ -147,7 +151,7 @@ FORA/
 
 **Design system** defaults to your own (`design-system/default.md`). For companies with a public design system, the page can adopt their visual language as a signal that you understand their craft.
 
-**generate.js** has two modes: `--run` assembles the page locally; `--publish` deploys to Vercel. Both are optional — see usage modes above.
+**generate.js** has three modes: `--run` assembles the page locally (needs Anthropic); `--deploy` deploys an already-generated page to Vercel (needs Vercel only, no Anthropic); `--publish` does both in one command (needs both). All three are optional depending on your mode.
 
 ---
 
