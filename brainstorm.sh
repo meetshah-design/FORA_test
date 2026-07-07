@@ -176,12 +176,11 @@ save_brief() {
   echo -e "  ${BOLD}1. Copy the JSON block${RESET} from the AI chat"
   echo -e "  ${BOLD}2. Come back here and press Enter${RESET}"
   echo ""
-  read -rp "  Press Enter when you have the JSON copied... "
+  # Wait for user — read from /dev/tty directly so stdin is not affected by paste
+  echo -n "  Press Enter when you have the JSON copied... "
+  read -r < /dev/tty
 
-  # Flush any stray input that was pasted into the terminal buffer
-  while read -r -t 0.1 _discard; do : ; done 2>/dev/null || true
-
-  # Read from clipboard silently — suppress any output
+  # Read from clipboard (never from stdin — avoids JSON dumping into terminal)
   local content
   content=$(paste_from_clipboard 2>/dev/null || true)
 
@@ -344,28 +343,10 @@ ASSEMBLED
 
   echo -e "${BOLD}Next step:${RESET}"
   echo ""
-  if [[ "$has_anthropic" == true && "$has_vercel" == true ]]; then
-    echo -e "  ${BOLD}node generate.js --publish briefs/${slug}.json${RESET}"
-    echo -e "  ${DIM}(Mode 3 — generates page + deploys to Vercel)${RESET}"
-  elif [[ "$has_anthropic" == true ]]; then
-    echo -e "  ${BOLD}node generate.js --run briefs/${slug}.json${RESET}"
-    echo -e "  ${DIM}(Mode 2A — generates page locally)${RESET}"
-  elif [[ "$has_vercel" == true ]]; then
-    echo ""
-    echo "  Mode 2B — paste the codegen prompt into your AI chat:"
-    echo -e "  ${DIM}cat prompts/codegen-prompt.md | pbcopy${RESET}"
-    echo "  Paste into AI chat with your brief. Save the HTML to:"
-    echo -e "  ${BOLD}output/${slug}/index.html${RESET}"
-    echo ""
-    echo "  Then deploy:"
-    echo -e "  ${BOLD}node generate.js --deploy briefs/${slug}.json${RESET}"
-  else
-    echo "  Mode 1 — paste the codegen prompt into your AI chat:"
-    echo -e "  ${DIM}cat prompts/codegen-prompt.md | pbcopy${RESET}"
-    echo "  Paste into AI chat with your brief. Save the HTML to:"
-    echo -e "  ${BOLD}output/${slug}/index.html${RESET}"
-    echo "  Then drag the output/${slug}/ folder to https://app.netlify.com/drop"
-  fi
+  echo -e "  ${BOLD}./run.sh --brief briefs/${slug}.json${RESET}"
+  echo -e "  ${DIM}(skips brainstorm, goes straight to generate + deploy)${RESET}"
+  echo ""
+  echo -e "  Or run the full flow again: ${BOLD}./run.sh${RESET}"
   echo ""
 }
 

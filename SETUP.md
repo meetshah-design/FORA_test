@@ -92,9 +92,6 @@ Result: https://fora-pages.vercel.app/company-role
 
 Step 2 is the only real work — but the AI does the heavy lifting. You paste your resume (or LinkedIn export, or any career notes) and it drafts your full `profile.json`. You review and correct. Most designers are done in 15 minutes. The profile is the foundation everything else builds on — do it once, reuse it forever.
 
-Throughout this guide, steps are labelled by where you're working:
-`[Terminal]` `[Browser]` `[Editor]`
-
 ---
 
 ## Before you start
@@ -203,7 +200,7 @@ Your design system is the visual baseline for every page you generate. The defau
 Skip this step entirely. The defaults work well out of the box. Come back to this once you've generated your first page and know what you want to change.
 
 **Option B — Configure it to match your personal brand**
-`[Browser]` Open any AI chat. Paste `prompts/ds-builder-prompt.md`.
+In your browser, open any AI chat. Paste `prompts/ds-builder-prompt.md`.
 
 Then share any combination of:
 - Your portfolio URL
@@ -213,7 +210,7 @@ Then share any combination of:
 
 The assistant extracts your visual language, asks a few focused questions, and outputs a complete configured `design-system/default.md`. Save it and you're done.
 
-`[Editor]` Or skip the AI and edit `design-system/default.md` directly — it's a plain markdown file with annotated tokens.
+Or open `design-system/default.md` directly in any text editor — it's a plain markdown file with annotated tokens.
 
 **You should now have:**
 ```
@@ -398,9 +395,9 @@ Or use GitHub Pages, Cloudflare Pages, S3, or any static host. The output is a s
 
 **Update your profile** — when you ship new work, get promoted, or change roles:
 
-`[Browser]` Open a new AI chat. Paste `prompts/profile-builder-prompt.md`, then paste your current `profile.json` and describe what changed ("I just shipped X at Y company — here are the details"). The AI merges the update. Save the output back to `profile/profile.json`.
+Open any AI chat, paste `prompts/profile-builder-prompt.md`, then paste your current `profile.json` and describe what changed ("I just shipped X at Y company — here are the details"). The AI merges the update. Save the output back to `profile/profile.json`.
 
-Or `[Editor]` edit `profile/profile.json` directly — the schema has inline instructions on every field.
+Or open `profile/profile.json` directly in any text editor — the schema has inline instructions on every field.
 
 ---
 
@@ -481,7 +478,7 @@ Check your `ANTHROPIC_API_KEY` in `.env`. Make sure there are no extra spaces or
 
 **Vercel deploy fails**
 
-`[Editor]` Check `VERCEL_TOKEN` and `VERCEL_PROJECT_NAME` in `.env`. Your Vercel project must exist before the first deploy.
+Open `.env` in any text editor and check `VERCEL_TOKEN` and `VERCEL_PROJECT_NAME`. Your Vercel project must exist before the first deploy.
 
 **The page looks unstyled**
 
@@ -489,4 +486,4 @@ Check that `design-system/default.md` exists. It ships with the repo — if it's
 
 **brainstorm.sh fetched an empty or broken JD**
 
-Some job boards block automated fetches. `[Browser]` Copy the JD text manually, open your AI chat, and paste `prompts/brainstorm-prompt.md` + your `profile.json` + the JD text directly.
+Some job boards block automated fetches. Copy the JD text manually, open your AI chat, and paste `prompts/brainstorm-prompt.md` + your `profile.json` + the JD text directly.

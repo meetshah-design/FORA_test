@@ -190,13 +190,11 @@ ASSEMBLED
   echo "  4. Copy the full HTML output (starting with <!DOCTYPE html>)"
   echo ""
 
-  # Wait for user
-  read -rp "  Press Enter when you have the HTML copied... "
+  # Wait for user — read from /dev/tty directly so stdin is not affected by paste
+  echo -n "  Press Enter when you have the HTML copied... "
+  read -r < /dev/tty
 
-  # Flush terminal buffer
-  while read -r -t 0.1 _discard; do : ; done 2>/dev/null || true
-
-  # Read from clipboard
+  # Read from clipboard (never from stdin — avoids HTML dumping into terminal)
   local content
   content=$(paste_from_clipboard 2>/dev/null || true)
 
@@ -216,8 +214,8 @@ ASSEMBLED
     warn "This doesn't look like a full HTML page."
     echo "  Make sure you copied the complete output starting with <!DOCTYPE html>"
     echo ""
-    read -rp "  Copy the full HTML and press Enter to try again (or Ctrl+C to exit): "
-    while read -r -t 0.1 _discard; do : ; done 2>/dev/null || true
+    echo -n "  Copy the full HTML and press Enter to try again (or Ctrl+C to exit): "
+    read -r < /dev/tty
     content=$(paste_from_clipboard 2>/dev/null || true)
   fi
 
