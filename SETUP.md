@@ -133,17 +133,21 @@ Anthropic and Vercel are independent. You only need what your mode requires.
 ## Step 1 — Fork and clone the repo
 *~2 min*
 
-`[Browser]` Go to [github.com/meetshahco/FORA](https://github.com/meetshahco/FORA) and click **Fork** (top right). This creates your own copy at `github.com/yourhandle/FORA`. You only need to do this once.
+**In your browser** — go to [github.com/meetshahco/FORA](https://github.com/meetshahco/FORA) and click **Fork** (top right). This creates your own copy at `github.com/yourhandle/FORA`. You only need to do this once.
 
-`[Terminal]` Clone your fork and run the setup script:
+**In your terminal** — clone your fork. Replace `yourhandle` with your GitHub username:
 ```bash
 git clone https://github.com/yourhandle/FORA.git
+```
+
+Then run these fixed commands exactly as written:
+```bash
 cd FORA
-chmod +x setup.sh brainstorm.sh
+chmod +x setup.sh brainstorm.sh run.sh
 ./setup.sh
 ```
 
-Replace `yourhandle` with your GitHub username.
+> **Important:** every command in this guide runs from inside the `FORA/` folder. If you open a new terminal tab at any point, run `cd path/to/FORA` to get back before continuing.
 
 `setup.sh` is a re-runnable health check. It verifies your environment, walks you through mode selection and API keys, and tells you exactly what's missing. Run it anytime — first setup, after changing keys, or on a new machine.
 
@@ -161,19 +165,26 @@ Replace `yourhandle` with your GitHub username.
 
 Your profile is your private career knowledge base. It lives only on your machine and is the source of truth for every application you generate. Build it once, update it as your work grows.
 
-`[Browser]` Open any AI chat — Claude.ai, ChatGPT, Gemini, Cursor, whatever you use.
-
-`[Editor]` Open `prompts/profile-builder-prompt.md` and copy the full contents.
-
-`[Browser]` Paste it into your AI chat, then share your raw materials in the same message — paste your resume text, LinkedIn export, or any career notes you have. The AI drafts a complete `profile.json` from whatever you give it, then walks you through reviewing it section by section. You correct anything that's wrong or missing.
-
-The more you share, the richer the profile. But even a resume paste is enough to get started.
-
-`[Editor]` When you're happy with the output, save the JSON to:
-
+**In your terminal** — copy the profile builder prompt to your clipboard:
+```bash
+cat prompts/profile-builder-prompt.md | pbcopy
 ```
-profile/profile.json
+
+**In your browser** — open any AI chat (Claude.ai, ChatGPT, Gemini, or any model you prefer). Paste with ⌘V, then in the same message paste your raw career materials — your resume text, a LinkedIn export, or any notes you have. The AI drafts a complete `profile.json` and walks you through reviewing it section by section. Correct anything that's wrong or missing.
+
+The more you share, the richer the profile. A resume paste is enough to get started.
+
+When the AI gives you the final JSON, copy it. Then **back in your terminal**, save it:
+```bash
+pbpaste > profile/profile.json
 ```
+
+Verify it was saved correctly:
+```bash
+./setup.sh --check
+```
+
+You should see `✓ profile.json found — [your name]`. If it shows an error, the JSON may be malformed — go back to the AI chat and ask it to output the JSON again cleanly, then re-run the save command.
 
 **You should now have:**
 ```
@@ -182,8 +193,8 @@ profile/profile.json
 
 This file is gitignored — it will never be committed or pushed.
 
-**Want to try FORA quickly before investing in a full profile?**
-See `examples/` — a complete worked example with a fictional designer's profile, brief, and generated page. You can run it end-to-end without building your own profile first.
+**Want to see FORA's output before building your profile?**
+Open `examples/alex-rivera/output/index.html` in your browser — a pre-generated page showing what FORA produces, no setup needed.
 
 ---
 
@@ -215,30 +226,38 @@ The assistant extracts your visual language, asks a few focused questions, and o
 
 ---
 
-## Step 4 — Configure environment variables
-*~5 min — skip if using Mode 1 (manual, zero cost)*
+## Step 4 — Configure API keys
+*~5 min — skip entirely if using Mode 1 or Mode 2B*
 
-FORA works without any API keys in fully manual mode. Configure this step only if you want automated codegen (`--run`) or automated deploy (`--publish`).
+| Mode | Needs this step? |
+|------|-----------------|
+| Mode 1 — fully manual | No — skip this step |
+| Mode 2A — auto codegen | Yes — Anthropic key only |
+| Mode 2B — auto deploy ★ | Yes — Vercel token only |
+| Mode 3 — fully automated | Yes — both keys |
 
-`[Terminal]`
+**In your terminal:**
 ```bash
 cp .env.example .env
 ```
 
-`[Editor]` Open `.env` and fill in what you need:
+Open `.env` in any text editor (TextEdit, VS Code, Notepad — anything) and fill in only the keys your mode needs:
 
 ```
-# For generate.js --run (automated codegen)
+# Mode 2A + 3 only — automated page generation
 ANTHROPIC_API_KEY=your_key_here
 
-# For generate.js --publish (automated deploy to Vercel)
+# Mode 2B + 3 only — automated deploy to Vercel
 VERCEL_TOKEN=your_vercel_token
 VERCEL_PROJECT_NAME=fora-pages
 ```
 
-To get your Vercel token: `[Browser]` vercel.com/account/tokens → Create Token.
+To get your Vercel token: go to [vercel.com/account/tokens](https://vercel.com/account/tokens) → Create Token.
 
-If you're skipping automated deploy, you can use Netlify drop, GitHub Pages, or any static host — `generate.js --run` produces a plain HTML file that works anywhere.
+Run the health check to confirm your keys are wired correctly:
+```bash
+./setup.sh --check
+```
 
 **You should now have (if applicable):**
 ```
@@ -250,58 +269,53 @@ If you're skipping automated deploy, you can use Netlify drop, GitHub Pages, or 
 ## Step 5 — Run your first brainstorm
 *~15 min*
 
-Here's what happens in this step and the next:
+Here's what happens in this step:
 
 ```
-  Your machine                  AI chat (browser tab)            Your machine
-  ─────────────                 ─────────────────────            ─────────────
-  brainstorm.sh                                                  
-  + profile.json   ──────────→  paste once                      
-  + JD text                     ↓                               
-                                brainstorm conversation          
-                                ↓                               
-                   ←──────────  content_brief.json              
-  save to                                                        
-  briefs/[slug].json                                             
-       ↓                                                         
-  generate.js          (Mode 2+3 only: calls Anthropic API)      
-       ↓                                                         
-  output/[slug]/                                                 
-  index.html       ──────────→  open in browser                 
+  Terminal              AI chat (browser tab)          Terminal
+  ────────              ─────────────────────          ────────
+  brainstorm.sh
+  + profile.json  ───→  paste once
+  + JD text             ↓
+                        brainstorm conversation
+                        ↓
+                        final content_brief.json  ───→ saved automatically
+                                                       briefs/[company-role].json
 ```
 
-Find a job description you want to apply to. Copy the URL.
-
-`[Terminal]`
+**In your terminal** — paste in the URL of the job description you want to apply for:
 ```bash
 ./brainstorm.sh https://company.com/jobs/senior-designer
 ```
 
-This fetches the JD, assembles the brainstorm prompt with your `profile.json`, and copies everything to your clipboard.
+The script fetches the JD, assembles your profile + the brainstorm prompt, and copies everything to your clipboard. It then waits for you.
 
-`[Browser]` Open any AI chat and paste. The FORA brainstorm agent will:
-1. Analyse the JD and score the match against your profile
+**In your browser** — open any AI chat and paste with ⌘V. The brainstorm agent will:
+1. Analyse the JD and score it against your profile
 2. Propose content for all three acts — who you are, what you've done, what you'll bring
-3. Ask if you have any visuals to attach (screenshots, Loom links, Figma URLs)
-4. Ask for your input or refinements
-5. Lock a `content_brief.json` and give you an assets checklist
+3. Ask if you have any visuals to include (screenshots, Loom links, Figma URLs)
+4. Ask for your input or refinements until you're happy
+5. Output the final `content_brief.json`
 
-`[Editor]` Save the brief the agent outputs:
+When the agent gives you the final JSON, **copy just the JSON block** (starting with `{` and ending with `}`).
+
+**Back in your terminal** — press Enter when prompted. The script reads from your clipboard and saves the brief automatically:
 ```
-briefs/acme-senior-designer.json
+✓ Brief saved → briefs/stripe-senior-designer.json
+✓ Valid JSON confirmed
 ```
 
-`[Terminal]` If the agent listed any local files in the assets checklist, drop them in:
+No filename to decide. No file to create manually. The name is derived from the URL you provided.
+
+If the agent also gives you an assets checklist (local files like screenshots), copy them into the assets folder:
 ```bash
-# e.g. cp ~/Desktop/kwikpay-dashboard.png assets/
+cp ~/Desktop/your-screenshot.png assets/
 ```
 
 **You should now have:**
 ```
-✓ briefs/
-    acme-senior-designer.json
-✓ assets/
-    [any local files you attached]
+✓ briefs/[company-role].json
+✓ assets/ (any local files listed in the assets checklist)
 ```
 
 Brief files are gitignored — they won't be committed.
