@@ -11,7 +11,7 @@
 #   {{DS_TOKENS}}         — CSS custom property overrides from the active design system
 #   {{SECTION_BRIEF}}     — the relevant slice of content_brief.json for this section
 #   {{TEMPLATE_CONFIG}}   — the section_config and slot_map from the active template JSON
-#   {{GLOBAL_RULES}}      — the standing rules block below (always appended)
+#   (Rules are embedded in this file — no separate {{GLOBAL_RULES}} injection needed)
 #
 # ──────────────────────────────────────────────────────────────────────────
 
@@ -37,8 +37,9 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 ## DESIGN SYSTEM TOKENS
 ## These CSS custom properties override the defaults in _base.html.
 ## Do not output them as a <style> block — they are already handled by generate.js.
-## Use them only to inform visual decisions if you need to write inline styles or
-## add conditional class logic (e.g. adapting contrast for a dark DS).
+## Do not make visual decisions based on token values. Trust the token system entirely.
+## Exception: if --color-ink resolves to a light color (i.e. the DS uses a dark background),
+## add class="fora-on-dark" to text elements that would otherwise produce dark text on a dark surface.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 {{DS_TOKENS}}
@@ -65,6 +66,9 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 3. Do not add new CSS custom properties or override DS tokens in the output. All visual customisation is done through the existing token system.
 4. Do not add new HTML sections, wrappers, or structural elements that are not in the template. The template structure is final.
 5. You may write HTML inside slot replacements (e.g. `<li>` elements for a list, `<a>` for a link). Keep it minimal.
+11. If a slot value is null, an empty string, or explicitly false: omit the element that would have contained it entirely. Do not render empty tags, empty links, or placeholder text. This applies globally — not just to slots called out in the section-specific rules.
+12. If a required brief field is missing or undefined: leave that slot visually absent but do not fabricate content. For text slots: render an empty string. For link slots: omit the element. Never generate placeholder text like "Coming soon", "TBD", or "[role]".
+13. Do not add decorative elements, dividers, icons, illustrations, or visual flourishes not specified in the section template or brief. The design system is intentionally minimal. Restraint is the correct output.
 
 ### Copy rules
 6. Write from the brief. Every piece of copy must trace to the brief — do not improvise or add information that isn't there.

@@ -8,12 +8,65 @@
 # ─────────────────────────────────────────────────────────────────
 # This is your personal design system. Edit any value in this file.
 # The code generator reads it on every run — changes apply immediately.
-# See default.example.md for a heavily annotated walkthrough of each section.
+#
+# IMPORTANT: Keep all CSS custom properties in a SINGLE ```css block
+# (see COLOR TOKENS below). generate.js reads the first ```css block
+# it finds — a second block will be silently ignored.
 #
 # If the brief specifies design_system: "company", this file is ignored
 # and the company's public DS is fetched instead. This file is always
 # the fallback if the company DS fetch fails.
 # ─────────────────────────────────────────────────────────────────
+
+---
+
+## TOKEN BLOCK
+<!-- generate.js reads this block and injects it after _base.html's reset and utilities. -->
+<!-- This is the ONLY source of CSS custom properties — _base.html has no :root fallback. -->
+<!-- Keep all custom properties here. One ```css block only. -->
+
+```css
+:root {
+  /* Color */
+  --color-bg:          #FFFFFF;
+  --color-surface:     #F7F7F5;
+  --color-border:      #E5E5E3;
+  --color-ink:         #1A1A18;
+  --color-mid:         #4A4A47;
+  --color-muted:       #8A8A85;
+  --color-accent:      #1A1A18;
+  --color-accent-soft: #F0EFE9;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-md:   18px;
+  --text-lg:   24px;
+  --text-xl:   32px;
+  --text-2xl:  48px;
+
+  /* Spacing */
+  --space-1:  8px;
+  --space-2:  16px;
+  --space-3:  24px;
+  --space-4:  32px;
+  --space-5:  48px;
+  --space-6:  64px;
+  --space-7:  96px;
+  --space-8:  128px;
+
+  /* Borders & radius */
+  --border:        1px solid #E5E5E3;
+  --border-strong: 1.5px solid #1A1A18;
+  --radius-sm:     3px;
+  --radius-md:     6px;
+  --radius-lg:     12px;
+}
+```
 
 ---
 
@@ -29,6 +82,7 @@ The goal: a hiring manager opens the page and reads it. Nothing gets in the way.
 ---
 
 ## COLOR TOKENS
+<!-- Reference only. generate.js reads the ```css block in TOKEN BLOCK above, not this one. -->
 
 Use these exact values as CSS custom properties on :root.
 
@@ -54,19 +108,17 @@ works alongside any company's brand without clashing.
 
 ### Typefaces
 
-Load both from Google Fonts. Add this to the <head>:
-
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-```
+Fonts are loaded by `templates/sections/_base.html` — do not add them again in generated sections.
+Inter and JetBrains Mono are already included via Google Fonts in every assembled page.
 
 **Inter** — used for all body text, headings, navigation, and UI elements.
 Clean, legible, designed for screens. Weight 300 for body, 400 for UI, 500–600 for headings.
 
 **JetBrains Mono** — used for labels, metadata, badges, eyebrows, and any small
 uppercase text. Never used for body paragraphs. Weight 400–500 only.
+
+To use a different typeface: update the Google Fonts link in `_base.html` and update
+`--font-sans` or `--font-mono` in the TOKEN BLOCK above.
 
 ### Type scale
 
@@ -89,7 +141,7 @@ uppercase text. Never used for body paragraphs. Weight 400–500 only.
 - Body: font-weight 300 for long prose. 400 for shorter descriptions and UI text.
 - Mono labels: always uppercase, letter-spacing 0.12em, font-weight 400 or 500.
 - Never bold a body paragraph. Use a new sentence structure instead.
-- Line length: cap body text at 620px max-width. Longer lines hurt readability.
+- Line length: cap body text at 620px max-width (matches .fora-section-intro in _base.html). Longer lines hurt readability.
 - No underlines except on interactive hover states.
 
 ---
@@ -239,9 +291,9 @@ The final section before footer. Dark background.
 Background: var(--color-ink). Text: #FFFFFF.
 Heading: Inter 600, xl (32px), letter-spacing -0.02em.
 Sub-text: Inter 300, base (15px), opacity 0.7.
-Button: white background, ink text, no border-radius, padding 12px 28px,
-Inter 500, sm (13px), uppercase, letter-spacing 0.06em.
-On hover: background var(--color-surface), color var(--color-ink).
+Button: no fill (transparent background), white text, 1px white border, padding 12px 28px,
+Inter 500, sm (13px), uppercase, letter-spacing 0.06em, no border-radius.
+On hover: background rgba(255,255,255,0.1).
 
 ### "What is this?" section
 

@@ -7,9 +7,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<!-- DS tokens injected here by generate.js -->
-<!-- {{ds_tokens}} -->
-
 <style>
 /* ── RESET ── */
 *, *::before, *::after {
@@ -18,48 +15,13 @@
   padding: 0;
 }
 
-/* ── CSS CUSTOM PROPERTIES ── */
-/* Set from default.md tokens or company DS tokens at runtime by generate.js */
-:root {
-  /* Colors */
-  --color-bg:         #FFFFFF;
-  --color-surface:    #F7F7F5;
-  --color-border:     #E5E5E3;
-  --color-ink:        #1A1A18;
-  --color-mid:        #4A4A47;
-  --color-muted:      #8A8A85;
-  --color-accent:     #1A1A18;
-  --color-accent-soft:#F0EFE9;
-
-  /* Typography */
-  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
-
-  /* Spacing (8px scale) */
-  --space-1:  8px;
-  --space-2:  16px;
-  --space-3:  24px;
-  --space-4:  32px;
-  --space-5:  48px;
-  --space-6:  64px;
-  --space-7:  96px;
-  --space-8:  128px;
-
-  /* Borders */
-  --border:        1px solid var(--color-border);
-  --border-strong: 1.5px solid var(--color-ink);
-
-  /* Radius */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 12px;
-}
-
 /* ── GLOBAL ── */
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -78,6 +40,11 @@ img {
 
 a {
   color: inherit;
+}
+
+/* CTA section links are always white — override the color: inherit above */
+.fora-cta-section a {
+  color: #FFFFFF;
 }
 
 /* ── SHARED UTILITIES ── */
@@ -112,7 +79,7 @@ a {
   font-weight: 300;
   color: var(--color-mid);
   line-height: 1.75;
-  max-width: 600px;
+  max-width: 620px;
   margin: 0;
 }
 
@@ -134,3 +101,6 @@ a {
   }
 }
 </style>
+
+<!-- DS token overrides injected here by generate.js — comes after base styles so tokens win the cascade -->
+<!-- {{ds_tokens}} -->

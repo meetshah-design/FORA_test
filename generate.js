@@ -174,7 +174,8 @@ function dsLoader(brief) {
     // V1 feature: fetch and parse company DS tokens
     // For now: warn and fall back to own DS
     warn(`Company DS fetch is a V1 feature. Falling back to your default DS.`);
-    warn(`To use company tokens manually, add them to design-system/default.md.`);
+    warn(`Company DS URL was: ${brief._meta.company_ds_url}`);
+    warn(`To use company tokens: extract them manually and add to design-system/default.md.`);
   }
 
   if (!fs.existsSync(dsPath)) {
@@ -184,12 +185,14 @@ function dsLoader(brief) {
 
   const content = fs.readFileSync(dsPath, 'utf8');
 
-  // Extract the CSS tokens block from default.md
-  // Expects a fenced block labelled ```css tokens or similar
+  // Extract the CSS tokens block from default.md.
+  // Looks for the FIRST fenced ```css block — keep all your token declarations
+  // in a single ```css block in default.md. Multiple blocks: only the first is read.
   const tokenMatch = content.match(/```css[^\n]*\n([\s\S]*?)```/);
   if (tokenMatch) return tokenMatch[1].trim();
 
-  // Fallback: look for :root { ... } block directly
+  // Fallback: look for first :root { ... } block directly.
+  // Same rule applies — keep all custom properties in a single :root block.
   const rootMatch = content.match(/:root\s*\{([\s\S]*?)\}/);
   if (rootMatch) return `:root {\n${rootMatch[1]}\n}`;
 
@@ -558,6 +561,30 @@ Usage:
     try {
       const liveUrl = await publisher(plan.slug, fullHtml);
       ok(`Deployed → ${liveUrl}`);
+
+      // ── Log to applications/applications.json ──────────────────────────
+      const appsPath = path.join(__dirname, 'applications', 'applications.json');
+      let apps = [];
+      if (fs.existsSync(appsPath)) {
+        try { apps = JSON.parse(fs.readFileSync(appsPath, 'utf8')); } catch {}
+      }
+      apps.push({
+        company:      brief._meta.company,
+        role:         brief._meta.role,
+        slug:         plan.slug,
+        url:          liveUrl,
+        published_at: new Date().toISOString(),
+        confidence:   brief._meta.confidence_score || null,
+        template:     brief._meta.template_id,
+        prompt_versions: {
+          brainstorm: brief._meta.schema_version || null,
+          codegen:    'codegen-v1',
+        },
+      });
+      fs.mkdirSync(path.dirname(appsPath), { recursive: true });
+      fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');
+      ok(`Logged → applications/applications.json (${apps.length} total)`);
+
       console.log('');
       console.log(`${BOLD}Live URL:${RESET}`);
       console.log(`  ${GREEN}${liveUrl}${RESET}`);
@@ -568,8 +595,10 @@ Usage:
     }
   } else {
     console.log('');
+    const absPath = path.resolve(outputFile);
     console.log(`${BOLD}Preview:${RESET}`);
-    console.log(`  open output/${plan.slug}/index.html`);
+    console.log(`  file://${absPath}`);
+    console.log(`  (paste into any browser, or: open output/${plan.slug}/index.html on mac)`);
     console.log('');
     console.log(`When ready to go live:`);
     console.log(`  ${BOLD}node generate.js --publish ${briefArg}${RESET}`);
