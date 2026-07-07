@@ -172,6 +172,9 @@ save_brief() {
   echo ""
   read -rp "  Press Enter when you have the JSON copied... "
 
+  # Flush any stray input that was pasted into the terminal buffer
+  while read -r -t 0.1 _discard; do : ; done 2>/dev/null || true
+
   # Read from clipboard silently — suppress any output
   local content
   content=$(paste_from_clipboard 2>/dev/null || true)
