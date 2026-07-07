@@ -119,6 +119,8 @@ Throughout this guide, steps are labelled by where you're working:
 - Your resume, LinkedIn export, or any career materials (for Step 2)
 - An AI chat open — Claude.ai, ChatGPT, Gemini, or any model you prefer
 
+**OS note:** These instructions are written for macOS. If you're on Linux, replace `pbcopy` with `xclip -selection clipboard` and `pbpaste` with `xclip -selection clipboard -o`. On Windows, WSL is recommended.
+
 **Mode 2A + 3 only — automated codegen:**
 - An Anthropic API key — [console.anthropic.com](https://console.anthropic.com/settings/keys)
 
@@ -336,36 +338,43 @@ Brief files are gitignored — they won't be committed.
 
 **Mode 2A + 3 — Automated codegen (Anthropic API key required):**
 
-`[Terminal]`
+In your terminal — replace `[company]` with the filename brainstorm.sh gave you:
 ```bash
-node generate.js --run briefs/acme-senior-designer.json
+node generate.js --run briefs/[company].json
 ```
 
-This calls the API per section, assembles your page, and writes it locally.
+This calls the API, assembles your page, and writes it to `output/[company]/index.html` automatically.
+
+---
 
 **Mode 1 + 2B — Manual codegen (no Anthropic key needed):**
 
-`[Browser]` Open any AI chat. Paste `prompts/codegen-prompt.md`, then paste the contents of your brief. Ask the assistant to generate each section one at a time.
-
-`[Editor]` Create the output folder and save the HTML:
-```
-output/acme-senior-designer/index.html
-```
-
-`[Terminal]` Preview your page:
+In your terminal — copy the codegen prompt:
 ```bash
-open output/acme-senior-designer/index.html
-# or on Windows/Linux: use the file:// path printed by generate.js --run
+cat prompts/codegen-prompt.md | pbcopy
 ```
+
+In your browser — open any AI chat, paste with ⌘V, then paste the contents of your brief JSON in the same message. The assistant generates the full page HTML.
+
+When you have the HTML, back in your terminal — save it. Replace `[company]` with your brief filename:
+```bash
+mkdir -p output/[company]
+pbpaste > output/[company]/index.html
+```
+
+Preview your page:
+```bash
+open output/[company]/index.html
+```
+
+---
 
 **You should now have:**
 ```
-✓ output/
-    acme-senior-designer/
-        index.html
+✓ output/[company]/index.html
 ```
 
-If something looks off, edit the brief and re-run (or re-paste into AI chat). The brief is the source of truth.
+If something looks off, go back to the AI chat, ask it to fix the specific section, copy the updated HTML, and run `pbpaste > output/[company]/index.html` again to overwrite.
 
 ---
 
