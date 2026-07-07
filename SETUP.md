@@ -193,6 +193,15 @@ You should see `✓ profile.json found — [your name]`. If it shows an error, t
 
 This file is gitignored — it will never be committed or pushed.
 
+**Updating your profile later** — when you ship new work or want to add more context, run the same command again:
+```bash
+cat prompts/profile-builder-prompt.md | pbcopy
+```
+Paste into your AI chat with your current `profile.json` + what changed ("I just shipped X at Y — here are the details"). The AI merges the update. Then save it back:
+```bash
+pbpaste > profile/profile.json
+```
+
 **Want to see FORA's output before building your profile?**
 Open `examples/alex-rivera/output/index.html` in your browser — a pre-generated page showing what FORA produces, no setup needed.
 
@@ -301,11 +310,11 @@ When the agent gives you the final JSON, **copy just the JSON block** (starting 
 
 **Back in your terminal** — press Enter when prompted. The script reads from your clipboard and saves the brief automatically:
 ```
-✓ Brief saved → briefs/stripe-senior-designer.json
+✓ Brief saved → briefs/[company].json
 ✓ Valid JSON confirmed
 ```
 
-No filename to decide. No file to create manually. The name is derived from the URL you provided.
+No filename to decide. No file to create manually. The name is derived from the company domain in the URL you provided.
 
 If the agent also gives you an assets checklist (local files like screenshots), copy them into the assets folder:
 ```bash

@@ -66,18 +66,19 @@ paste_from_clipboard() {
 }
 
 # ── Derive slug from URL ─────────────────────────────────────────────────────
+# Extracts the domain name only (e.g. "remote", "notion", "linear")
+# Avoids job ID numbers and path noise like /openings/7762220003
 derive_slug() {
   local url="$1"
-  # Strip protocol, domain, trailing slashes — keep path segments
   echo "$url" \
     | sed 's|https\?://||' \
     | sed 's|www\.||' \
-    | awk -F'/' '{for(i=2;i<=NF;i++) printf "%s%s", $i, (i<NF?"-":""); print ""}' \
+    | awk -F'/' '{print $1}' \
+    | awk -F'.' '{print $(NF-1)}' \
     | sed 's/[^a-zA-Z0-9-]/-/g' \
     | sed 's/--*/-/g' \
     | sed 's/^-//;s/-$//' \
-    | tr '[:upper:]' '[:lower:]' \
-    | cut -c1-60
+    | tr '[:upper:]' '[:lower:]'
 }
 
 # ── Fetch JD text from URL ───────────────────────────────────────────────────
@@ -120,6 +121,45 @@ save_brief() {
 
   mkdir -p "$BRIEFS_DIR"
 
+  # Check if brief already exists and ask what to do
+  if [[ -f "$brief_path" ]]; then
+    echo ""
+    warn "A brief for this company already exists: briefs/${slug}.json"
+    echo ""
+    echo "  What would you like to do?"
+    echo "  1) Overwrite it with a new brief"
+    echo "  2) Save as a new version (briefs/${slug}-v2.json)"
+    echo "  3) Keep the existing brief and exit"
+    echo ""
+    read -rp "  Enter 1, 2, or 3: " choice
+    case "$choice" in
+      1)
+        info "Will overwrite briefs/${slug}.json"
+        ;;
+      2)
+        # Find next available version number
+        local v=2
+        while [[ -f "$BRIEFS_DIR/${slug}-v${v}.json" ]]; do
+          ((v++))
+        done
+        slug="${slug}-v${v}"
+        brief_path="$BRIEFS_DIR/${slug}.json"
+        info "Will save as briefs/${slug}.json"
+        ;;
+      3)
+        echo ""
+        ok "Keeping existing brief. To use it:"
+        echo ""
+        echo -e "  ${BOLD}./run.sh --brief briefs/${slug}.json${RESET}"
+        echo ""
+        exit 0
+        ;;
+      *)
+        fail "Invalid choice. Run brainstorm.sh again."
+        ;;
+    esac
+  fi
+
   echo ""
   echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
   echo -e "${BOLD}Step 2 of 2 — Save the brief${RESET}"
@@ -131,42 +171,64 @@ save_brief() {
   echo -e "  ${BOLD}2. Come back here and press Enter${RESET}"
   echo ""
   read -rp "  Press Enter when you have the JSON copied... "
-  echo ""
 
-  # Read from clipboard
+  # Read from clipboard silently — suppress any output
   local content
   content=$(paste_from_clipboard 2>/dev/null || true)
 
   # Fallback: ask user to paste directly in terminal
   if [[ -z "$content" ]]; then
-    echo "  Clipboard is empty. Paste the JSON directly below."
-    echo -e "  ${DIM}Paste the JSON, then press Ctrl+D on a new line:${RESET}"
     echo ""
-    content=$(cat)
+    echo "  Clipboard appears empty. Paste the JSON directly below,"
+    echo -e "  then press ${BOLD}Ctrl+D${RESET} on a new empty line when done:"
+    echo ""
+    content=$(cat 2>/dev/null || true)
   fi
 
   if [[ -z "$content" ]]; then
-    fail "No content received. Run brainstorm.sh again and copy the JSON before pressing Enter."
+    fail "No content received. Copy the JSON from your AI chat and run brainstorm.sh again."
   fi
 
-  # Validate JSON
-  if ! echo "$content" | node -e "process.stdin.resume();process.stdin.setEncoding('utf8');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{JSON.parse(d);process.exit(0)}catch(e){process.exit(1)}});" 2>/dev/null; then
+  # Validate JSON silently
+  local valid=true
+  echo "$content" | node -e "
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    let d='';
+    process.stdin.on('data',c=>d+=c);
+    process.stdin.on('end',()=>{
+      try{JSON.parse(d);process.exit(0)}
+      catch(e){process.exit(1)}
+    });
+  " 2>/dev/null || valid=false
+
+  if [[ "$valid" == false ]]; then
     echo ""
     warn "The content doesn't look like valid JSON."
     echo ""
-    echo "  Make sure you copied only the JSON block from the AI chat"
-    echo "  (starting with { and ending with }) — not the surrounding text."
+    echo "  Make sure you copied only the JSON block (starting with { and ending with })"
+    echo "  not the surrounding text or assets checklist."
     echo ""
-    read -rp "  Try again? Copy the JSON and press Enter (or Ctrl+C to exit): "
-    content=$(paste_from_clipboard 2>/dev/null || cat)
+    read -rp "  Copy the JSON block and press Enter to try again (or Ctrl+C to exit): "
+    content=$(paste_from_clipboard 2>/dev/null || true)
+    echo "$content" | node -e "
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+      let d='';
+      process.stdin.on('data',c=>d+=c);
+      process.stdin.on('end',()=>{try{JSON.parse(d);process.exit(0)}catch(e){process.exit(1)}});
+    " 2>/dev/null || fail "Still not valid JSON. Check the AI output and try again."
   fi
 
   # Save the file
-  echo "$content" > "$brief_path"
+  printf '%s' "$content" > "$brief_path"
 
+  # Clear any terminal noise from clipboard paste, then print clean result
   echo ""
+  echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
   ok "Brief saved → briefs/${slug}.json"
   ok "Valid JSON confirmed"
+  echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
   echo ""
 }
 
