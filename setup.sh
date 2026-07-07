@@ -114,7 +114,8 @@ else
   echo "  3. Share your resume, LinkedIn export, or any career materials"
   echo "  4. Save the AI's output to: profile/profile.json"
   echo ""
-  echo "  This takes ~45 minutes. Run ./setup.sh again when it's done."
+  echo "  This takes ~15 minutes — the AI does the heavy lifting from your resume paste."
+  echo "  Run ./setup.sh again when it's done."
   echo ""
   exit 1
 fi

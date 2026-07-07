@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "schema_version": "1.1.0",
+    "owner": "Alex Rivera",
+    "purpose": "Example profile for FORA. Fictional designer — used to demonstrate what a complete, well-structured profile.json looks like. Replace with your own data.",
+    "pipeline": "FORA — an agentic pipeline that reads this file, runs a narrative brainstorm per opportunity, and generates personalised application landing pages."
+  },
+
+  "identity": {
+    "name": "Alex Rivera",
+    "title": "Senior Product Designer",
+    "tagline": "I design the systems that make products scale — not just the surfaces that make them look good.",
+    "years_of_experience": 6,
+    "based_in": "London, UK",
+    "open_to_relocation": false,
+    "relocation_preference": [],
+    "contact": {
+      "email": "alex@alexrivera.design",
+      "portfolio": "https://alexrivera.design",
+      "linkedin": "https://linkedin.com/in/alexrivera"
+    },
+    "positioning": "I've spent six years at the intersection of product and systems design — first at a 12-person fintech startup where I was the only designer, then scaling a design function from 3 to 11 people at a Series B SaaS company. I build design systems that survive engineering rewrites and research practices that actually change product decisions. I'm most useful to teams that are past the 'make it look good' stage and into the 'make it work at scale' stage.",
+    "industries": ["FinTech", "B2B SaaS", "Developer Tools"],
+    "core_skills": [
+      "Design systems architecture",
+      "0-to-1 product design",
+      "Cross-functional product strategy",
+      "User research and synthesis",
+      "Design team building and mentorship",
+      "Figma component systems"
+    ],
+    "tools": ["Figma", "Notion", "Linear", "Maze", "Loom", "Framer"],
+    "working_style": [
+      "Written-first communicator — I document decisions and share context async before asking for meetings",
+      "Strong opinions, loosely held — I propose a direction and revise fast when shown a better path",
+      "Research before opinions — I form views from user evidence, not instinct",
+      "Systems thinker — I look for the root cause and the compounding fix, not the patch"
+    ]
+  },
+
+  "philosophy": {
+    "design_thinking": "Good design is a decision made visible. The best product decisions are the ones that look inevitable in retrospect — that only happens when the problem was understood precisely before the solution was imagined.",
+    "on_ai": "I use AI as a thinking partner, not a shortcut. It's useful for exploring a solution space faster — not for skipping the problem definition.",
+    "on_systems": "A design system is a bet on the future. The tokens and components matter less than the decisions behind them — what's included, what's excluded, and why. I write those decisions down.",
+    "personal_philosophy": "Specificity is a form of respect. Vague design reviews waste everyone's time. Vague briefs produce vague work. I try to be specific about problems, specific about evidence, and specific about what I'm asking for.",
+    "on_building": "I've built products from nothing and I've inherited products from other designers. Both are interesting problems. The harder one is inheriting — you have to understand why things are the way they are before you change them."
+  },
+
+  "career": [
+    {
+      "id": "senior-pd-vaultpay",
+      "role": "Senior Product Designer",
+      "company": "VaultPay",
+      "company_description": "Series B fintech building payment infrastructure for B2B marketplaces. 140 people, London.",
+      "location": "London, UK",
+      "period": "2022 — present",
+      "type": "Full-time",
+      "nda_sensitive": false,
+      "unlaunched": false,
+      "framing_note": "Lead designer on the merchant dashboard and the onboarding flow. Also built the first version of the internal design system.",
+      "headline_story": "Joined as the second designer at VaultPay when the product had no consistent visual language and onboarding took an average of 11 days. Over 18 months I rebuilt the onboarding flow end-to-end, created the first design system, and brought average onboarding time down to 3 days. The design system is now used by 8 engineers and 3 designers.",
+      "key_decisions": [
+        {
+          "decision": "Rebuilt onboarding as a progressive disclosure flow rather than a linear checklist",
+          "rationale": "Analysis of drop-off data showed 60% of merchants were abandoning at the document upload step, not because they lacked documents but because they couldn't see why each document was needed at that moment. Progressive disclosure meant we only asked for documents when the merchant hit a capability they needed to unlock.",
+          "outcome": "Onboarding completion rate increased from 34% to 71% over 3 months. Average time to first transaction dropped from 11 days to 3 days."
+        },
+        {
+          "decision": "Built the design system before we had a dedicated DS engineer",
+          "rationale": "Engineering was rebuilding the frontend in React. Rather than wait for a DS engineer (6 month hiring timeline), I built a Figma component library that mapped 1:1 to the engineering tokens already in the codebase. The bet was that alignment on tokens would be faster to maintain than alignment on visuals.",
+          "outcome": "Shipped the first version in 6 weeks. Engineering adopted it immediately — no new component has been built outside the system in 14 months."
+        }
+      ],
+      "what_was_built": [
+        "End-to-end merchant onboarding flow (0 to first transaction)",
+        "VaultPay design system v1 — 40 components, full token set, Figma + React",
+        "Merchant dashboard — transaction monitoring, dispute management, settings",
+        "Internal design review process — weekly, async-first"
+      ],
+      "key_insight": "The fastest way to improve a product is to understand exactly where users stop and why. Not sentiment — behaviour. Onboarding drop-off analysis was more valuable than 6 months of user interviews.",
+      "team_size": 3,
+      "tags": ["fintech", "design-systems", "onboarding", "b2b", "series-b"]
+    },
+    {
+      "id": "product-designer-stackform",
+      "role": "Product Designer",
+      "company": "Stackform",
+      "company_description": "Developer tools startup building form infrastructure for SaaS products. Seed stage, remote.",
+      "location": "Remote",
+      "period": "2020 — 2022",
+      "type": "Full-time",
+      "nda_sensitive": false,
+      "unlaunched": false,
+      "framing_note": "First and only designer for 18 months. Owned the full product surface.",
+      "headline_story": "Joined Stackform as their first designer when the product was a working prototype with no design system, no user research practice, and a 3% trial-to-paid conversion rate. Built the design practice from scratch — research process, component library, design review — and shipped a full product redesign over 9 months.",
+      "key_decisions": [
+        {
+          "decision": "Started with a research sprint before touching any UI",
+          "rationale": "The founders wanted a visual redesign. My first observation was that the product had never done structured user research. I proposed a 3-week discovery sprint before any design work — to understand why conversion was low before designing a solution to it.",
+          "outcome": "Discovery revealed that the core problem was not UI quality but onboarding confusion — users didn't understand what Stackform did differently from competitors until their second session. This changed the entire redesign brief."
+        }
+      ],
+      "what_was_built": [
+        "Full product redesign — dashboard, builder, preview, settings",
+        "First user research practice — interview templates, synthesis process, insight repository",
+        "Stackform component library v1 in Figma",
+        "Onboarding redesign based on discovery findings"
+      ],
+      "key_insight": "As the first designer, the most important thing you build is the research practice — not the components. Components can be rebuilt. A culture of evidence-based decisions is much harder to install later.",
+      "team_size": 1,
+      "tags": ["developer-tools", "saas", "founding-designer", "seed", "research"]
+    }
+  ],
+
+  "case_studies": [
+    {
+      "id": "vaultpay-onboarding",
+      "title": "Merchant Onboarding — VaultPay",
+      "company": "VaultPay",
+      "display_status": "Shipped — fully presentable",
+      "nda_sensitive": false,
+      "unlaunched": false,
+      "framing_guidance": "Lead with the data story — drop-off analysis to insight to redesign to outcome. The key decision (progressive disclosure) is the interesting design thinking. The outcome numbers (34% → 71% completion) are the proof.",
+      "problem": "60% of merchants were abandoning onboarding at the document upload step. The business assumption was that merchants lacked the required documents. Research revealed the real problem: merchants couldn't understand why each document was needed at that moment, so they deferred and never came back.",
+      "insight": "Friction in onboarding is almost always about trust and clarity, not effort. Merchants weren't struggling to upload documents — they were struggling to understand why VaultPay needed them before they'd seen any value.",
+      "process": [
+        "Analysed drop-off data by step — identified document upload as the primary exit point",
+        "Ran 8 user interviews with churned merchants — found the trust/clarity pattern",
+        "Mapped the current flow against merchant mental model — identified 4 moments where the ask came before the value",
+        "Designed progressive disclosure model — gated document requests behind capability unlocks",
+        "Ran moderated usability testing on the new flow with 6 merchants",
+        "Shipped in 3 phases over 8 weeks"
+      ],
+      "outcome": "Onboarding completion rate: 34% → 71%. Average time to first transaction: 11 days → 3 days. Merchant support tickets about onboarding: down 60%.",
+      "key_decisions": [
+        "Progressive disclosure over linear checklist — match the document ask to the moment the merchant needs the capability it unlocks",
+        "Added a 'why we need this' micro-copy pattern — 2 sentences explaining each document request in merchant terms, not compliance terms"
+      ],
+      "tags": ["onboarding", "fintech", "research", "conversion"]
+    }
+  ],
+
+  "signals": {
+    "systems_at_scale": {
+      "description": "Designs systems that survive growth — not components that need to be rebuilt every 18 months.",
+      "evidence": [
+        "Built VaultPay design system v1 — adopted by 8 engineers, no out-of-system components in 14 months",
+        "Mapped Figma tokens 1:1 to engineering tokens before a single component was built"
+      ],
+      "best_for_roles": ["Design systems lead", "Senior IC at scaling company", "Head of Design at Series B+"]
+    },
+    "research_driven": {
+      "description": "Forms views from user behaviour and evidence, not instinct or aesthetic preference.",
+      "evidence": [
+        "Proposed and ran discovery sprint at Stackform before any redesign work — changed the entire brief",
+        "Drop-off analysis at VaultPay identified the real onboarding problem, not the assumed one"
+      ],
+      "best_for_roles": ["Product designer at research-heavy company", "Any role where the problem space is unclear"]
+    },
+    "founding_designer_experience": {
+      "description": "Has operated as sole designer — built the practice, not just the product.",
+      "evidence": [
+        "First and only designer at Stackform for 18 months",
+        "Built research process, component library, and design review from scratch"
+      ],
+      "best_for_roles": ["First design hire", "Head of Design at early-stage company", "Founding designer"]
+    }
+  },
+
+  "current_projects": [
+    {
+      "id": "fora",
+      "name": "FORA",
+      "description": "Open-source pipeline that turns a job description into a personalised application landing page. Built as a side project to solve my own job search problem.",
+      "status": "Launched",
+      "stage": "MVP shipped, first real applications running.",
+      "nda_sensitive": false,
+      "tags": ["open-source", "ai", "side-project"]
+    }
+  ],
+
+  "personal": {
+    "interests": ["Type design", "Generative systems", "Long-form writing", "Urban cycling"],
+    "philosophy_anchor": "Legibility as a design value — in typography, in interfaces, in code, in decisions. If someone can't read it quickly and accurately, it isn't done yet.",
+    "aesthetic_references": ["iA Writer", "Stripe Docs", "Butterick's Practical Typography", "Swiss graphic design"],
+    "portfolio_aesthetic": "Typographic, editorial, near-monochrome. Inter for body, JetBrains Mono for labels. Warm off-white backgrounds. No gradients. No shadows. The page should feel like a considered document, not a portfolio showcase."
+  },
+
+  "tone_of_voice": {
+    "rules": [
+      "First person, present tense where possible",
+      "Lead with the specific decision or outcome — not the job title or company name",
+      "No 'passionate about design' or equivalent filler",
+      "Numbers when available — percentages, timeframes, team sizes",
+      "Short sentences. One idea per sentence."
+    ],
+    "do": ["Lead with specifics", "Name the decision and the evidence behind it", "Use numbers", "Be direct about what you built and what happened"],
+    "dont": ["Say 'passionate', 'leveraged', 'utilized', or 'synergized'", "Describe process without outcome", "Use 'I helped with' — own what you did", "Soften outcomes"]
+  }
+}

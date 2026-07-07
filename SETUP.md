@@ -100,14 +100,12 @@ Result: https://fora-pages.vercel.app/company-role
 | Step | What you're doing | Required? | Time |
 |------|-------------------|-----------|-----:|
 | 1 | Fork + clone the repo | Yes | 2 min |
-| 2 | Build your profile | Yes | ~45 min |
+| 2 | Build your profile | Yes | ~15 min |
 | 3 | Set up your design system | Optional | 5 min |
 | 4 | Configure API keys | Mode 2A + 3 need Anthropic. Mode 2B + 3 need Vercel. | 5 min |
-| 5 | Run your first brainstorm | Yes | ~15 min |
-| 6 | Generate your page | Yes — see mode table | 2–15 min |
-| 7 | Deploy | Mode 2B + 3 only | 2 min |
+| 5 | Run your first application | Yes | ~15 min |
 
-Most of the time is Step 2 — building your profile. That's intentional. The profile is the foundation everything else builds on. Do it once, reuse it forever.
+Step 2 is the only real work — but the AI does the heavy lifting. You paste your resume (or LinkedIn export, or any career notes) and it drafts your full `profile.json`. You review and correct. Most designers are done in 15 minutes. The profile is the foundation everything else builds on — do it once, reuse it forever.
 
 Throughout this guide, steps are labelled by where you're working:
 `[Terminal]` `[Browser]` `[Editor]`
@@ -159,7 +157,7 @@ Replace `yourhandle` with your GitHub username.
 ---
 
 ## Step 2 — Build your profile
-*~45 min — the most important step*
+*~15 min — the AI does the heavy lifting*
 
 Your profile is your private career knowledge base. It lives only on your machine and is the source of truth for every application you generate. Build it once, update it as your work grows.
 
@@ -167,17 +165,14 @@ Your profile is your private career knowledge base. It lives only on your machin
 
 `[Editor]` Open `prompts/profile-builder-prompt.md` and copy the full contents.
 
-`[Browser]` Paste it into your AI chat, then share your raw materials — your resume, LinkedIn export, case study notes, anything that documents your work. The more you share, the richer the profile. The assistant will ask a few focused questions, draft a complete `profile.json`, and walk you through reviewing it section by section.
+`[Browser]` Paste it into your AI chat, then share your raw materials in the same message — paste your resume text, LinkedIn export, or any career notes you have. The AI drafts a complete `profile.json` from whatever you give it, then walks you through reviewing it section by section. You correct anything that's wrong or missing.
 
-`[Editor]` When you're happy with the output, create the file and paste the JSON in:
+The more you share, the richer the profile. But even a resume paste is enough to get started.
+
+`[Editor]` When you're happy with the output, save the JSON to:
 
 ```
 profile/profile.json
-```
-
-`[Terminal]` Verify it exists:
-```bash
-cat profile/profile.json
 ```
 
 **You should now have:**
@@ -186,6 +181,9 @@ cat profile/profile.json
 ```
 
 This file is gitignored — it will never be committed or pushed.
+
+**Want to try FORA quickly before investing in a full profile?**
+See `examples/` — a complete worked example with a fictional designer's profile, brief, and generated page. You can run it end-to-end without building your own profile first.
 
 ---
 
@@ -389,9 +387,62 @@ The output is a single self-contained `index.html`. It works on any static host:
 
 ---
 
+## Maintaining FORA
+
+**Update your profile** — when you ship new work, get promoted, or change roles:
+
+`[Browser]` Open a new AI chat. Paste `prompts/profile-builder-prompt.md`, then paste your current `profile.json` and describe what changed ("I just shipped X at Y company — here are the details"). The AI merges the update. Save the output back to `profile/profile.json`.
+
+Or `[Editor]` edit `profile/profile.json` directly — the schema has inline instructions on every field.
+
+---
+
+**Update your design system** — when you rebrand or want a different visual feel:
+
+`[Browser]` Open a new AI chat. Paste `prompts/ds-builder-prompt.md`. Share your portfolio URL, a DS file, or just describe your aesthetic. The AI outputs a configured `design-system/default.md`. Save it.
+
+Or `[Editor]` edit `design-system/default.md` directly — all tokens are in the `TOKEN BLOCK` section at the top.
+
+---
+
+**Switch mode** — if you get an API key or want to change your setup:
+
+`[Terminal]`
+```bash
+./setup.sh
+```
+
+Select "switch mode" when prompted. Your `.env` is rewritten.
+
+---
+
+**Health check** — if something stops working:
+
+`[Terminal]`
+```bash
+./setup.sh --check
+```
+
+Runs all five checks silently, reports exactly what's missing.
+
+---
+
+**Re-run an existing application** — if you want to tweak the brief and regenerate:
+
+`[Editor]` Edit `briefs/[slug].json` directly.
+
+`[Terminal]`
+```bash
+./run.sh --brief briefs/[slug].json
+```
+
+Skips the brainstorm, goes straight to generate and deploy.
+
+---
+
 ## What's next
 
-**Apply again.** `[Terminal]` Run `brainstorm.sh` with a new JD. Your profile stays — each application takes 15–20 minutes once you're set up.
+**Apply again.** `[Terminal]` Run `./run.sh` with a new JD URL — it handles brainstorm, generate, and deploy in one guided flow. Your profile stays — each application takes 15–20 minutes once you're set up.
 
 **Update your profile.** When you ship new work, `[Editor]` open `profile/profile.json` and update the relevant entry. Or `[Browser]` re-run `profile-builder-prompt.md` with your current profile + what changed — the assistant handles the merge.
 
