@@ -187,7 +187,7 @@ else
   echo ""
 
   # Recovery shortcut — user typed "r" or "R" at the URL prompt
-  if [[ "${JD_URL,,}" == "r" ]]; then
+  if [[ "$(echo "$JD_URL" | tr '[:upper:]' '[:lower:]')" == "r" ]]; then
     echo -e "  What company is this brief for? (used as the filename)"
     echo -e "  ${DIM}e.g. remote, linear, nola${RESET}"
     flush_stdin; read -r recover_slug < /dev/tty
