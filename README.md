@@ -44,18 +44,25 @@ Result: a URL you can send in a cold message
 
 ## Usage options
 
-FORA is tool-agnostic and cost-optional. You choose how to generate and deploy **per application** — not once during setup. Anthropic and Vercel are fully independent.
+FORA is tool-agnostic and cost-optional. You choose how to generate and deploy **per application** — not once during setup. AI provider and Vercel are fully independent.
 
 | Option | Codegen | Deploy | Keys needed |
 |--------|---------|--------|-------------|
 | 1 | Manual codegen via AI chat | Manual deploy via any static host | None |
 | 2 ★ | Manual codegen via AI chat | Auto deploy via Vercel | Vercel token |
-| 3 | Auto codegen via Anthropic API | Manual deploy via any static host | Anthropic key |
-| 4 | Auto codegen via Anthropic API | Auto deploy via Vercel | Both |
+| 3 | Auto codegen via AI API | Manual deploy via any static host | Anthropic, Gemini, or OpenAI key |
+| 4 | Auto codegen via AI API | Auto deploy via Vercel | AI key + Vercel token |
 
-★ Option 2 is the most practical starting point — permanent URL with zero Anthropic cost.
+★ Option 2 is the most practical starting point — permanent URL with zero AI API cost.
 
 `run.sh` detects which keys you have and shows only what's available. Start with option 1, add keys when you're ready, and options unlock automatically — no reconfiguration needed.
+
+**Supported AI providers for auto codegen (options 3 + 4):**
+- Anthropic Claude — [console.anthropic.com](https://console.anthropic.com/settings/keys)
+- Google Gemini — [aistudio.google.com](https://aistudio.google.com/app/apikey)
+- OpenAI — [platform.openai.com](https://platform.openai.com/api-keys)
+
+Add any one key to `.env` — FORA auto-detects which provider to use.
 
 ---
 
@@ -70,13 +77,13 @@ brainstorm.sh → copies prompt to clipboard → paste into AI chat
   ▼
 content_brief.json  (saved automatically)
   │
-  ├──→ Auto codegen via Anthropic API   (options 3 + 4 — needs Anthropic key)
+  ├──→ Auto codegen via AI API           (options 3 + 4 — needs any AI key)
   │         ↓
-  └──→ Manual codegen via AI chat       (options 1 + 2 — no API key needed)
+  └──→ Manual codegen via AI chat        (options 1 + 2 — no API key needed)
             ↓
       assembled HTML page
             │
-  ├──→ Auto deploy via Vercel           (options 2 + 4 — needs Vercel token)
+  ├──→ Auto deploy via Vercel            (options 2 + 4 — needs Vercel token)
   │         ↓ live URL
   │
   └──→ Manual deploy via any static host (options 1 + 3 — no Vercel needed)
@@ -121,7 +128,7 @@ FORA/
 │
 ├── output/                       # Generated HTML — gitignored
 │
-├── generate.js                   # Main script: --run and --publish modes
+├── generate.js                   # Main script: --run, --publish, --deploy modes
 ├── brainstorm.sh                 # Fetches JD, assembles prompt, copies to clipboard
 ├── .env.example                  # Environment variables (all optional depending on mode)
 ├── DEVPLAN.md                    # MVP and V1 build plan
@@ -140,7 +147,7 @@ FORA/
 
 **Design system** defaults to your own (`design-system/default.md`). For companies with a public design system, the page can adopt their visual language as a signal that you understand their craft.
 
-**generate.js** has three modes: `--run` assembles the page locally (needs Anthropic); `--deploy` deploys an already-generated page to Vercel (needs Vercel only, no Anthropic); `--publish` does both in one command (needs both). All three are optional depending on your mode.
+**generate.js** supports three AI providers and three run modes. `--run` assembles the page locally (needs any AI key); `--deploy` deploys an already-generated page to Vercel (needs Vercel only, no AI key); `--publish` does both in one command (needs AI key + Vercel). All are optional depending on your mode.
 
 ---
 

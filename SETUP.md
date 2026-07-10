@@ -36,30 +36,37 @@ Before you start, here's the mental model. Three pieces, no magic connections be
 
 ## Modes — pick yours before starting
 
-FORA works in three modes. You don't need an API key to get a real output.
+FORA works in four modes. You don't need an API key to get a real output.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  1  Manual codegen via AI chat + Manual deploy via any static host          │
-│     Free — no API keys needed                                               │
+│     Free — no keys needed                                                   │
 │     Best for: first run, no keys yet                                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  2  Manual codegen via AI chat + Auto deploy via Vercel          ★          │
 │     Needs: Vercel token only                                                │
-│     Best for: permanent URL with zero Anthropic cost                        │
+│     Best for: permanent URL with zero AI API cost                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  3  Auto codegen via Anthropic API + Manual deploy via any static host      │
-│     Needs: Anthropic API key only                                           │
+│  3  Auto codegen via AI API + Manual deploy via any static host             │
+│     Needs: Anthropic, Gemini, or OpenAI key                                 │
 │     Best for: fast generation, deploy wherever you prefer                   │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  4  Auto codegen via Anthropic API + Auto deploy via Vercel                 │
-│     Needs: Anthropic + Vercel                                               │
+│  4  Auto codegen via AI API + Auto deploy via Vercel                        │
+│     Needs: any AI key + Vercel token                                        │
 │     Best for: fully automated — URL ready to send the same day              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-★ Option 2 is the most practical starting point — permanent URL, zero API cost.
-  Anthropic and Vercel are fully independent. You only need what your option requires.
+★ Option 2 is the most practical starting point — permanent URL, zero AI API cost.
+  AI provider and Vercel are fully independent. You only need what your option requires.
 ```
+
+**Supported AI providers for options 3 + 4:**
+- Anthropic Claude — [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
+- Google Gemini — [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+- OpenAI — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+
+Add any one key to `.env` — FORA auto-detects the provider. If you have multiple keys set, it prioritises Anthropic → Gemini → OpenAI, or you can force a specific provider with `AI_PROVIDER=gemini` in `.env`.
 
 You choose your option **per application** when you run `./run.sh` — not once during setup. If you have no keys, option 1 is always available. As you add keys, more options unlock automatically.
 
@@ -87,7 +94,7 @@ Result: https://fora-pages.vercel.app/company-role
 | 1 | Fork + clone the repo | Yes | 2 min |
 | 2 | Build your profile | Yes | ~15 min |
 | 3 | Set up your design system | Optional | 5 min |
-| 4 | Configure API keys | Mode 2A + 3 need Anthropic. Mode 2B + 3 need Vercel. | 5 min |
+| 4 | Configure API keys | Options 3 + 4 need an AI key. Options 2 + 4 need Vercel. | 5 min |
 | 5 | Run your first application | Yes | ~15 min |
 
 Step 2 is the only real work — but the AI does the heavy lifting. You paste your resume (or LinkedIn export, or any career notes) and it drafts your full `profile.json`. You review and correct. Most designers are done in 15 minutes. The profile is the foundation everything else builds on — do it once, reuse it forever.
@@ -103,14 +110,16 @@ Step 2 is the only real work — but the AI does the heavy lifting. You paste yo
 
 **OS note:** These instructions are written for macOS. If you're on Linux, replace `pbcopy` with `xclip -selection clipboard` and `pbpaste` with `xclip -selection clipboard -o`. On Windows, WSL is recommended.
 
-**Mode 2A + 3 only — automated codegen:**
-- An Anthropic API key — [console.anthropic.com](https://console.anthropic.com/settings/keys)
+**Options 3 + 4 only — automated codegen (pick one):**
+- Anthropic Claude key — [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
+- Google Gemini key — [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+- OpenAI key — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-**Mode 2B + 3 only — automated deploy:**
+**Options 2 + 4 only — automated deploy:**
 - A Vercel account — [vercel.com](https://vercel.com) (free tier works)
 - A Vercel token — [vercel.com/account/tokens](https://vercel.com/account/tokens)
 
-Anthropic and Vercel are independent. You only need what your mode requires.
+AI provider and Vercel are independent. You only need what your option requires.
 
 ---
 
@@ -220,27 +229,32 @@ Or open `design-system/default.md` directly in any text editor — it's a plain 
 ---
 
 ## Step 4 — Configure API keys
-*~5 min — skip entirely if using Mode 1 or Mode 2B*
+*~5 min — skip entirely if using option 1*
 
-| Mode | Needs this step? |
-|------|-----------------|
-| Mode 1 — fully manual | No — skip this step |
-| Mode 2A — auto codegen | Yes — Anthropic key only |
-| Mode 2B — auto deploy ★ | Yes — Vercel token only |
-| Mode 3 — fully automated | Yes — both keys |
+| Option | Needs this step? |
+|--------|-----------------|
+| Option 1 — fully manual | No — skip this step |
+| Option 2 — manual codegen, auto deploy | Yes — Vercel token only |
+| Option 3 — auto codegen, manual deploy | Yes — one AI key (Anthropic, Gemini, or OpenAI) |
+| Option 4 — fully automated | Yes — one AI key + Vercel token |
 
 **In your terminal:**
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` in any text editor (TextEdit, VS Code, Notepad — anything) and fill in only the keys your mode needs:
+Open `.env` in any text editor (TextEdit, VS Code, Notepad — anything) and fill in only what your option needs.
 
+For auto codegen (options 3 + 4) — add **one** AI key:
 ```
-# Mode 2A + 3 only — automated page generation
+# Pick one — FORA auto-detects which provider to use
 ANTHROPIC_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+```
 
-# Mode 2B + 3 only — automated deploy to Vercel
+For auto deploy (options 2 + 4) — add your Vercel token:
+```
 VERCEL_TOKEN=your_vercel_token
 VERCEL_PROJECT_NAME=fora-pages
 ```
@@ -339,7 +353,7 @@ This skips the brainstorm and goes straight to generate → deploy.
 
 **What happens based on your option:**
 
-Options 3 + 4 (Anthropic API): the script calls the API and writes `output/[company]/index.html` automatically.
+Options 3 + 4 (auto codegen): the script calls your configured AI provider's API and writes `output/[company]/index.html` automatically. Works with Anthropic, Gemini, or OpenAI — whichever key you have in `.env`.
 
 Options 1 + 2 (manual codegen): the script copies the full codegen prompt + brief to your clipboard. Paste into your AI chat, copy the HTML output, come back to the terminal and press Enter. The script saves it automatically.
 
@@ -412,12 +426,19 @@ Or open `design-system/default.md` directly in any text editor — all tokens ar
 
 **Add or switch API keys** — if you want to unlock a new option:
 
-Open `.env` in any text editor and add your key. Then verify:
+Open `.env` in any text editor and add your key. Supported providers:
+```
+ANTHROPIC_API_KEY=   — https://console.anthropic.com/settings/keys
+GEMINI_API_KEY=      — https://aistudio.google.com/app/apikey
+OPENAI_API_KEY=      — https://platform.openai.com/api-keys
+```
+
+Then verify:
 ```bash
 ./setup.sh --check
 ```
 
-The next time you run `./run.sh`, the new option will show as available automatically.
+The next time you run `./run.sh`, the new option will show as available automatically. If you have multiple keys and want to control which one is used, add `AI_PROVIDER=gemini` (or `anthropic` / `openai`) to `.env`.
 
 ---
 
@@ -479,7 +500,7 @@ Running setup.sh automatically fixes permissions on all scripts.
 
 **generate.js fails with API error**
 
-Check your `ANTHROPIC_API_KEY` in `.env`. Make sure there are no extra spaces or quotes.
+Check your AI key in `.env` (`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `OPENAI_API_KEY`). Make sure there are no extra spaces or quotes. Run `./run.sh status` to confirm which key is detected.
 
 **Vercel deploy fails**
 

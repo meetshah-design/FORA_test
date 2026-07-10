@@ -73,6 +73,8 @@ elif [[ "${1:-}" == "status" ]]; then
 
   # API keys
   ANTHROPIC_KEY=""
+  GEMINI_KEY=""
+  OPENAI_KEY=""
   VERCEL_TOKEN=""
   if [[ -f ".env" ]]; then
     while IFS= read -r line || [[ -n "$line" ]]; do
@@ -80,24 +82,28 @@ elif [[ "${1:-}" == "status" ]]; then
       k="${line%%=*}"; v="${line#*=}"
       case "$k" in
         ANTHROPIC_API_KEY) ANTHROPIC_KEY="$v" ;;
+        GEMINI_API_KEY)    GEMINI_KEY="$v" ;;
+        OPENAI_API_KEY)    OPENAI_KEY="$v" ;;
         VERCEL_TOKEN)      VERCEL_TOKEN="$v" ;;
       esac
     done < ".env"
   fi
   echo ""
   [[ -n "$ANTHROPIC_KEY" ]] && ok "Anthropic key      set" || echo -e "${DIM}  Anthropic key      not set${RESET}"
+  [[ -n "$GEMINI_KEY"    ]] && ok "Gemini key         set" || echo -e "${DIM}  Gemini key         not set${RESET}"
+  [[ -n "$OPENAI_KEY"    ]] && ok "OpenAI key         set" || echo -e "${DIM}  OpenAI key         not set${RESET}"
   [[ -n "$VERCEL_TOKEN"  ]] && ok "Vercel token       set" || echo -e "${DIM}  Vercel token       not set${RESET}"
 
   # Available options
   echo ""
   HAS_A=false; HAS_V=false
-  [[ -n "$ANTHROPIC_KEY" ]] && HAS_A=true
+  { [[ -n "$ANTHROPIC_KEY" ]] || [[ -n "$GEMINI_KEY" ]] || [[ -n "$OPENAI_KEY" ]]; } && HAS_A=true
   [[ -n "$VERCEL_TOKEN"  ]] && HAS_V=true
   echo -e "  Available options:"
   echo -e "  1 ${GREEN}✓${RESET}  Manual codegen + Manual deploy"
   [[ "$HAS_V" == true ]]              && echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy via Vercel"   || echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy via Vercel  (needs Vercel token)${RESET}"
-  [[ "$HAS_A" == true ]]              && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via Anthropic + Manual deploy" || echo -e "  3 ${DIM}✗  Auto codegen via Anthropic + Manual deploy (needs Anthropic key)${RESET}"
-  [[ "$HAS_A" == true && "$HAS_V" == true ]] && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via Anthropic + Auto deploy via Vercel" || echo -e "  4 ${DIM}✗  Auto codegen via Anthropic + Auto deploy  (needs both keys)${RESET}"
+  [[ "$HAS_A" == true ]]              && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via AI API + Manual deploy"    || echo -e "  3 ${DIM}✗  Auto codegen via AI API + Manual deploy   (needs Anthropic, Gemini, or OpenAI key)${RESET}"
+  [[ "$HAS_A" == true && "$HAS_V" == true ]] && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via AI API + Auto deploy via Vercel" || echo -e "  4 ${DIM}✗  Auto codegen via AI API + Auto deploy     (needs AI key + Vercel token)${RESET}"
 
   # Recent briefs
   echo ""
@@ -151,6 +157,8 @@ fi
 
 # ── Load .env (detect available keys) ────────────────────────────────────────
 ANTHROPIC_KEY=""
+GEMINI_KEY=""
+OPENAI_KEY=""
 VERCEL_TOKEN=""
 VERCEL_PROJECT="fora-pages"
 
@@ -161,6 +169,8 @@ if [[ -f ".env" ]]; then
     v="${v%\"*}"; v="${v#\"}"
     case "$k" in
       ANTHROPIC_API_KEY)   ANTHROPIC_KEY="$v" ;;
+      GEMINI_API_KEY)      GEMINI_KEY="$v" ;;
+      OPENAI_API_KEY)      OPENAI_KEY="$v" ;;
       VERCEL_TOKEN)        VERCEL_TOKEN="$v" ;;
       VERCEL_PROJECT_NAME) VERCEL_PROJECT="$v" ;;
     esac
@@ -223,24 +233,26 @@ step "2/3" "Generate"
 echo ""
 
 # Build available options based on detected keys
-HAS_ANTHROPIC=false
+HAS_AI=false
 HAS_VERCEL=false
-[[ -n "$ANTHROPIC_KEY" ]] && HAS_ANTHROPIC=true
+{ [[ -n "$ANTHROPIC_KEY" ]] || [[ -n "$GEMINI_KEY" ]] || [[ -n "$OPENAI_KEY" ]]; } && HAS_AI=true
 [[ -n "$VERCEL_TOKEN"  ]] && HAS_VERCEL=true
 
 echo "  How do you want to generate and deploy this page?"
 echo ""
-echo -e "  ${BOLD}1)${RESET} Manual codegen via AI chat   + Manual deploy via any static host"
-echo -e "  ${BOLD}2)${RESET} Manual codegen via AI chat   + Auto deploy via Vercel            $([ "$HAS_VERCEL" == false ] && echo "${DIM}(needs Vercel token)${RESET}" || echo "${GREEN}✓${RESET}")"
-echo -e "  ${BOLD}3)${RESET} Auto codegen via Anthropic API + Manual deploy via any static host $([ "$HAS_ANTHROPIC" == false ] && echo "${DIM}(needs Anthropic key)${RESET}" || echo "${GREEN}✓${RESET}")"
-echo -e "  ${BOLD}4)${RESET} Auto codegen via Anthropic API + Auto deploy via Vercel            $([ "$HAS_ANTHROPIC" == false ] || [ "$HAS_VERCEL" == false ] && echo "${DIM}(needs both keys)${RESET}" || echo "${GREEN}✓${RESET}")"
+echo -e "  ${BOLD}1)${RESET} Manual codegen via AI chat + Manual deploy via any static host"
+echo -e "  ${BOLD}2)${RESET} Manual codegen via AI chat + Auto deploy via Vercel            $([ "$HAS_VERCEL" == false ] && echo "${DIM}(needs Vercel token)${RESET}" || echo "${GREEN}✓${RESET}")"
+echo -e "  ${BOLD}3)${RESET} Auto codegen via AI API   + Manual deploy via any static host  $([ "$HAS_AI" == false ] && echo "${DIM}(needs Anthropic, Gemini, or OpenAI key)${RESET}" || echo "${GREEN}✓${RESET}")"
+echo -e "  ${BOLD}4)${RESET} Auto codegen via AI API   + Auto deploy via Vercel             $([ "$HAS_AI" == false ] || [ "$HAS_VERCEL" == false ] && echo "${DIM}(needs AI key + Vercel token)${RESET}" || echo "${GREEN}✓${RESET}")"
 echo ""
 
 # Show which keys are active
-if [[ "$HAS_ANTHROPIC" == true || "$HAS_VERCEL" == true ]]; then
+if [[ "$HAS_AI" == true || "$HAS_VERCEL" == true ]]; then
   KEYS_MSG="  Keys detected:"
-  [[ "$HAS_ANTHROPIC" == true ]] && KEYS_MSG+=" Anthropic ✓"
-  [[ "$HAS_VERCEL" == true ]]    && KEYS_MSG+=" Vercel ✓"
+  [[ -n "$ANTHROPIC_KEY" ]] && KEYS_MSG+=" Anthropic ✓"
+  [[ -n "$GEMINI_KEY"    ]] && KEYS_MSG+=" Gemini ✓"
+  [[ -n "$OPENAI_KEY"    ]] && KEYS_MSG+=" OpenAI ✓"
+  [[ "$HAS_VERCEL" == true ]] && KEYS_MSG+=" Vercel ✓"
   dim "$KEYS_MSG"
 else
   dim "  No keys detected — option 1 is free and needs nothing"
@@ -262,19 +274,21 @@ case "$MODE_CHOICE" in
     MODE="2b"
     ;;
   3)
-    if [[ "$HAS_ANTHROPIC" == false ]]; then
+    if [[ "$HAS_AI" == false ]]; then
       echo ""
-      warn "Option 3 needs an Anthropic API key. Add ANTHROPIC_API_KEY to your .env and run again."
-      echo "  Get a key at: https://console.anthropic.com/settings/keys"
+      warn "Option 3 needs an AI API key. Add one of these to your .env and run again."
+      echo "  ANTHROPIC_API_KEY — https://console.anthropic.com/settings/keys"
+      echo "  GEMINI_API_KEY    — https://aistudio.google.com/app/apikey"
+      echo "  OPENAI_API_KEY    — https://platform.openai.com/api-keys"
       exit 1
     fi
     MODE="2a"
     ;;
   4)
-    if [[ "$HAS_ANTHROPIC" == false || "$HAS_VERCEL" == false ]]; then
+    if [[ "$HAS_AI" == false || "$HAS_VERCEL" == false ]]; then
       echo ""
-      warn "Option 4 needs both keys. Add missing keys to your .env and run again."
-      [[ "$HAS_ANTHROPIC" == false ]] && echo "  Missing: ANTHROPIC_API_KEY — https://console.anthropic.com/settings/keys"
+      warn "Option 4 needs both an AI key and a Vercel token. Add missing keys to your .env and run again."
+      [[ "$HAS_AI" == false ]] && echo "  Missing AI key — add one of: ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY"
       [[ "$HAS_VERCEL" == false ]]    && echo "  Missing: VERCEL_TOKEN — https://vercel.com/account/tokens"
       exit 1
     fi

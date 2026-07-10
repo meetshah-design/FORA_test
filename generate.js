@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 /**
  * FORA — generate.js
- * Version: 1.0.0
+ * Version: 1.1.0
  *
  * Three modes:
- *   node generate.js --run     briefs/[slug].json   → assembles HTML to output/  (needs Anthropic API)
- *   node generate.js --publish briefs/[slug].json   → assembles + deploys to Vercel  (needs Anthropic + Vercel)
+ *   node generate.js --run     briefs/[slug].json   → assembles HTML to output/  (needs Anthropic, Gemini, or OpenAI key)
+ *   node generate.js --publish briefs/[slug].json   → assembles + deploys to Vercel  (needs AI key + Vercel)
  *   node generate.js --deploy  briefs/[slug].json   → deploys existing output/ to Vercel  (needs Vercel only)
+ *
+ * Supported AI providers (auto-detected from .env, or set AI_PROVIDER explicitly):
+ *   ANTHROPIC_API_KEY  → claude-opus-4-5 (default model)
+ *   GEMINI_API_KEY     → gemini-2.0-flash (default model)
+ *   OPENAI_API_KEY     → gpt-4o (default model)
+ *   AI_MODEL           → override default model for whichever provider is active
+ *   AI_PROVIDER        → force a specific provider (anthropic | gemini | openai)
  *
  * Internal modules (in order of execution):
  *   1. Planner        — reads brief + template, builds execution plan in memory
@@ -71,7 +78,35 @@ function fetchUrl(url, options = {}) {
   });
 }
 
-// ── Anthropic API call ───────────────────────────────────────────────────────
+// ── Provider detection ───────────────────────────────────────────────────────
+// Priority: explicit AI_PROVIDER env var → first key found → error
+function detectProvider() {
+  const explicit = (process.env.AI_PROVIDER || '').toLowerCase();
+  if (explicit) {
+    const valid = ['anthropic', 'gemini', 'openai'];
+    if (!valid.includes(explicit)) fail(`Unknown AI_PROVIDER "${explicit}". Use: anthropic, gemini, openai`);
+    return explicit;
+  }
+  if (process.env.ANTHROPIC_API_KEY) return 'anthropic';
+  if (process.env.GEMINI_API_KEY)    return 'gemini';
+  if (process.env.OPENAI_API_KEY)    return 'openai';
+  fail(`No AI API key found. Add one of these to your .env:
+  ANTHROPIC_API_KEY  — https://console.anthropic.com/settings/keys
+  GEMINI_API_KEY     — https://aistudio.google.com/app/apikey
+  OPENAI_API_KEY     — https://platform.openai.com/api-keys`);
+}
+
+// ── Unified AI caller ────────────────────────────────────────────────────────
+async function callAI(systemPrompt, userMessage) {
+  const provider = detectProvider();
+  switch (provider) {
+    case 'anthropic': return callAnthropic(systemPrompt, userMessage);
+    case 'gemini':    return callGemini(systemPrompt, userMessage);
+    case 'openai':    return callOpenAI(systemPrompt, userMessage);
+  }
+}
+
+// ── Anthropic ────────────────────────────────────────────────────────────────
 async function callAnthropic(systemPrompt, userMessage) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) fail('ANTHROPIC_API_KEY is not set. Add it to your .env file.');
@@ -97,15 +132,78 @@ async function callAnthropic(systemPrompt, userMessage) {
 
   if (res.status !== 200) {
     let errMsg = `Anthropic API error ${res.status}`;
-    try {
-      const parsed = JSON.parse(res.body);
-      if (parsed.error?.message) errMsg += `: ${parsed.error.message}`;
-    } catch {}
+    try { const p = JSON.parse(res.body); if (p.error?.message) errMsg += `: ${p.error.message}`; } catch {}
     throw new Error(errMsg);
   }
 
   const parsed = JSON.parse(res.body);
   return parsed.content?.[0]?.text ?? '';
+}
+
+// ── Gemini ───────────────────────────────────────────────────────────────────
+async function callGemini(systemPrompt, userMessage) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) fail('GEMINI_API_KEY is not set. Add it to your .env file.');
+
+  const model = process.env.AI_MODEL || 'gemini-2.0-flash';
+
+  const payload = JSON.stringify({
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+    generationConfig: { maxOutputTokens: 4096 },
+  });
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const res = await fetchUrl(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: payload,
+  });
+
+  if (res.status !== 200) {
+    let errMsg = `Gemini API error ${res.status}`;
+    try { const p = JSON.parse(res.body); if (p.error?.message) errMsg += `: ${p.error.message}`; } catch {}
+    throw new Error(errMsg);
+  }
+
+  const parsed = JSON.parse(res.body);
+  return parsed.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+}
+
+// ── OpenAI ───────────────────────────────────────────────────────────────────
+async function callOpenAI(systemPrompt, userMessage) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) fail('OPENAI_API_KEY is not set. Add it to your .env file.');
+
+  const model = process.env.AI_MODEL || 'gpt-4o';
+
+  const payload = JSON.stringify({
+    model,
+    max_tokens: 4096,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userMessage  },
+    ],
+  });
+
+  const res = await fetchUrl('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization:  `Bearer ${apiKey}`,
+      'content-type': 'application/json',
+    },
+    body: payload,
+  });
+
+  if (res.status !== 200) {
+    let errMsg = `OpenAI API error ${res.status}`;
+    try { const p = JSON.parse(res.body); if (p.error?.message) errMsg += `: ${p.error.message}`; } catch {}
+    throw new Error(errMsg);
+  }
+
+  const parsed = JSON.parse(res.body);
+  return parsed.choices?.[0]?.message?.content ?? '';
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -283,7 +381,7 @@ async function codegen(sectionId, sectionConfig, brief, profile, dsTokens, plan)
     .replace('{{SECTION_BRIEF}}',   JSON.stringify(sectionBrief, null, 2))
     .replace('{{TEMPLATE_CONFIG}}', templateConfig);
 
-  const html = await callAnthropic(
+  const html = await callAI(
     'You are the FORA code generator. Output only the filled HTML section. No markdown fences. No commentary.',
     fullPrompt
   );
@@ -480,12 +578,20 @@ async function main() {
 ${BOLD}FORA — generate.js${RESET}
 
 Usage:
-  node generate.js --run     briefs/[slug].json   # assemble page locally       (needs Anthropic API key)
-  node generate.js --publish briefs/[slug].json   # assemble + deploy to Vercel (needs Anthropic + Vercel)
-  node generate.js --deploy  briefs/[slug].json   # deploy existing output/     (needs Vercel only — no Anthropic key)
+  node generate.js --run     briefs/[slug].json   # assemble page locally       (needs AI key)
+  node generate.js --publish briefs/[slug].json   # assemble + deploy to Vercel (needs AI key + Vercel)
+  node generate.js --deploy  briefs/[slug].json   # deploy existing output/     (needs Vercel only)
 
   --deploy is for Mode 2B: you generated the HTML manually in an AI chat,
-  saved it to output/[slug]/index.html, and now want to deploy without an API key.
+  saved it to output/[slug]/index.html, and now want to deploy without an AI key.
+
+Supported AI providers (set one key in .env, FORA auto-detects):
+  ANTHROPIC_API_KEY  → https://console.anthropic.com/settings/keys
+  GEMINI_API_KEY     → https://aistudio.google.com/app/apikey
+  OPENAI_API_KEY     → https://platform.openai.com/api-keys
+
+Override model:     AI_MODEL=gemini-2.0-pro  (or any model name for your provider)
+Force provider:     AI_PROVIDER=gemini        (if you have multiple keys set)
 `);
     process.exit(0);
   }
