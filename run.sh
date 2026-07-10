@@ -2,7 +2,7 @@
 # FORA — run.sh
 # Per-application script. Run this for every new job you apply to.
 # Guides you through brainstorm → generate → deploy in one flow.
-# Mode is selected per-run — no lock-in.
+# Option is selected per-run — no lock-in.
 #
 # Usage:
 #   ./run.sh                              — interactive, prompts for JD URL

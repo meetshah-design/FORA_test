@@ -80,7 +80,7 @@ By the end of this guide:
 ✓ A private career knowledge base (profile.json)
 ✓ A brainstorm run against a real job description
 ✓ A personalised application landing page
-✓ A live URL you can send in a cold message (Mode 3 only)
+✓ A live URL you can send in a cold message (options 2 + 4 only)
 
 Result: https://fora-pages.vercel.app/company-role
 ```
@@ -98,6 +98,18 @@ Result: https://fora-pages.vercel.app/company-role
 | 5 | Run your first application | Yes | ~15 min |
 
 Step 2 is the only real work — but the AI does the heavy lifting. You paste your resume (or LinkedIn export, or any career notes) and it drafts your full `profile.json`. You review and correct. Most designers are done in 15 minutes. The profile is the foundation everything else builds on — do it once, reuse it forever.
+
+**What one application run looks like (Step 5 in detail):**
+
+| Phase | What happens | Where | Time |
+|-------|-------------|-------|-----:|
+| Brainstorm | FORA fetches the JD, assembles your profile + prompt, copies to clipboard | Terminal → AI chat | ~10 min |
+| Brief | AI analyses the role, proposes all three acts, you refine and approve | AI chat | ~5 min |
+| Save | You copy the final JSON, press Enter — brief saved automatically | Terminal | ~1 min |
+| Generate | Paste codegen prompt into AI chat (or auto via API) — full HTML produced | AI chat or API | ~3 min |
+| Deploy | Page live on Vercel (auto) or drag to Netlify (manual) | Terminal or browser | ~1 min |
+
+Total per application once set up: **~15–20 min**
 
 ---
 
@@ -142,13 +154,13 @@ chmod +x setup.sh brainstorm.sh codegen.sh run.sh
 
 > **Important:** every command in this guide runs from inside the `FORA/` folder. If you open a new terminal tab at any point, run `cd path/to/FORA` to get back before continuing.
 
-`setup.sh` is a re-runnable health check. It verifies your environment, walks you through mode selection and API keys, and tells you exactly what's missing. Run it anytime — first setup, after changing keys, or on a new machine.
+`setup.sh` is a re-runnable health check. It verifies your environment, walks you through key setup, and tells you exactly what's missing. Run it anytime — first setup, after changing keys, or on a new machine.
 
 **You should now have:**
 ```
 ✓ FORA/ folder on your machine
 ✓ Node version confirmed
-✓ Mode selected and .env written (if using Mode 2B/3)
+✓ .env written with your keys (if applicable)
 ```
 
 ---
@@ -456,7 +468,7 @@ Runs all checks silently and reports exactly what's missing.
 ./run.sh --brief briefs/[company].json
 ```
 
-Skips the brainstorm, goes straight to mode selection → generate → deploy.
+Skips the brainstorm, goes straight to option selection → generate → deploy.
 
 ---
 

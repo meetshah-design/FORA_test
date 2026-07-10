@@ -236,10 +236,10 @@ ASSEMBLED
 
   if [[ "$has_vercel" == true ]]; then
     echo -e "  ${BOLD}node generate.js --deploy briefs/${slug}.json${RESET}"
-    echo -e "  ${DIM}(Mode 2B — deploys to Vercel, returns live URL)${RESET}"
+    echo -e "  ${DIM}(Option 2 — deploys to Vercel, returns live URL)${RESET}"
   else
     echo "  Drag your output/${slug}/ folder to https://app.netlify.com/drop"
-    echo -e "  ${DIM}(Mode 1 — free, no account needed)${RESET}"
+    echo -e "  ${DIM}(Option 1 — free, no account needed)${RESET}"
   fi
   echo ""
 }

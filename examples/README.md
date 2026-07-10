@@ -15,7 +15,7 @@ Use this to:
 
 **Designer:** Alex Rivera — 6 years experience, product and systems design background
 **Role applied to:** Head of Design at Meridian (fictional Series B fintech)
-**Mode used:** Mode 2B — manual codegen, auto deploy
+**Option used:** Option 2 — manual codegen, auto deploy via Vercel
 
 ---
 

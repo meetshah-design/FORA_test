@@ -103,7 +103,7 @@ FORA/
 ├── prompts/
 │   ├── profile-builder-prompt.md # Run once to build profile.json from your materials
 │   ├── brainstorm-prompt.md      # Run per application — JD → content_brief.json
-│   └── codegen-prompt.md         # Used by generate.js — or paste manually for Mode 1
+│   └── codegen-prompt.md         # Used by generate.js — or paste manually for Option 1
 │
 ├── briefs/
 │   ├── example-brief.json        # Reference schema for content_brief.json

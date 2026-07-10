@@ -86,7 +86,7 @@ read brief → load default.md → call Anthropic API per section
 ```
 read existing output/[slug]/index.html → deploy to Vercel → log to applications.json
 ```
-Use this after generating HTML manually in an AI chat (Mode 2B).
+Use this after generating HTML manually in an AI chat (Option 2).
 
 `--publish briefs/[slug].json` *(needs Anthropic + Vercel)*
 ```

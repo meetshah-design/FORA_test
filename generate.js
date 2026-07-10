@@ -6,7 +6,7 @@
  * Three modes:
  *   node generate.js --run     briefs/[slug].json   → assembles HTML to output/  (needs Anthropic, Gemini, or OpenAI key)
  *   node generate.js --publish briefs/[slug].json   → assembles + deploys to Vercel  (needs AI key + Vercel)
- *   node generate.js --deploy  briefs/[slug].json   → deploys existing output/ to Vercel  (needs Vercel only)
+ *   node generate.js --deploy  briefs/[slug].json   → deploys existing output/ to Vercel  (needs Vercel only — Option 2)
  *
  * Supported AI providers (auto-detected from .env, or set AI_PROVIDER explicitly):
  *   ANTHROPIC_API_KEY  → claude-opus-4-5 (default model)
@@ -582,7 +582,7 @@ Usage:
   node generate.js --publish briefs/[slug].json   # assemble + deploy to Vercel (needs AI key + Vercel)
   node generate.js --deploy  briefs/[slug].json   # deploy existing output/     (needs Vercel only)
 
-  --deploy is for Mode 2B: you generated the HTML manually in an AI chat,
+  --deploy is for Option 2: you generated the HTML manually in an AI chat,
   saved it to output/[slug]/index.html, and now want to deploy without an AI key.
 
 Supported AI providers (set one key in .env, FORA auto-detects):
@@ -634,9 +634,9 @@ Force provider:     AI_PROVIDER=gemini        (if you have multiple keys set)
       fail(`No generated page found at output/${plan.slug}/index.html
 
 Generate the HTML first — either:
-  Mode 1 (manual): paste prompts/codegen-prompt.md + your brief into any AI chat,
-                   assemble the sections, save to output/${plan.slug}/index.html
-  Mode 2 (auto):   node generate.js --run ${briefArg}`);
+  Option 1 (manual): paste prompts/codegen-prompt.md + your brief into any AI chat,
+                     assemble the sections, save to output/${plan.slug}/index.html
+  Option 3 (auto):   node generate.js --run ${briefArg}`);
     }
 
     const htmlContent = fs.readFileSync(outputFile, 'utf8');
