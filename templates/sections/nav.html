@@ -1,11 +1,14 @@
 <!-- FORA — nav.html -->
 <!-- Static section. Slots filled from content_brief.json, not by LLM. -->
-<!-- Slots: {{designer_name}} {{company_name}} {{portfolio_url}} -->
+<!-- Slots: {{designer_name}} {{company_name}} {{portfolio_url}} {{company_logo_url}} -->
 
 <nav class="fora-nav">
   <div class="fora-nav__inner">
     <span class="fora-nav__name">{{designer_name}}</span>
-    <span class="fora-nav__badge">For {{company_name}}</span>
+    <span class="fora-nav__badge">
+      {{#if company_logo_url}}<img src="{{company_logo_url}}" alt="{{company_name}}" class="fora-nav__logo" onerror="this.style.display='none'">{{/if}}
+      For {{company_name}}
+    </span>
     <a href="{{portfolio_url}}" target="_blank" rel="noopener" class="fora-nav__portfolio">Portfolio</a>
   </div>
 </nav>
@@ -45,6 +48,17 @@
   background: var(--color-surface);
   border: var(--border);
   padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fora-nav__logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border-radius: 2px;
+  display: inline-block;
+  vertical-align: middle;
 }
 .fora-nav__portfolio {
   font-family: var(--font-mono);

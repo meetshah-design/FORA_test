@@ -42,7 +42,7 @@ Assemble sections in this order:
 
 ## SECTION-SPECIFIC RULES
 
-**nav:** nav_badge renders in `<span class="fora-eyebrow">`. If portfolio_url is null, omit the portfolio link.
+**nav:** The badge renders as `<span class="fora-nav__badge">`. If `company_logo_url` is present in the brief, render `<img src="{company_logo_url}" alt="{company_name}" class="fora-nav__logo" onerror="this.style.display='none'">` inside the badge span, before the "For {company_name}" text. If `company_logo_url` is null or missing, omit the img entirely. If `portfolio_url` is null, omit the portfolio link.
 
 **act1_hero:** philosophy_note renders as `<p class="fora-philosophy-note">` — italic, no quotation marks. Signal pills render as `<span class="fora-signal-pill">` inside `.fora-signals-row`.
 
