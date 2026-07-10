@@ -8,6 +8,7 @@
 #   ./run.sh                              — interactive, prompts for JD URL
 #   ./run.sh https://company.com/jobs/x  — pass JD URL directly
 #   ./run.sh --brief briefs/[slug].json  — skip brainstorm, use existing brief
+#   ./run.sh status                       — show pipeline state and recent activity
 
 set -e
 
@@ -21,6 +22,7 @@ CYAN='\033[0;36m'
 RESET='\033[0m'
 
 ok()   { echo -e "${GREEN}✓${RESET} $1"; }
+flush_stdin() { while read -r -t 0 _; do read -r _; done 2>/dev/null || true; }
 fail() { echo -e "${RED}✗${RESET} $1"; exit 1; }
 warn() { echo -e "${YELLOW}⚠${RESET}  $1"; }
 info() { echo -e "${BOLD}→${RESET} $1"; }
@@ -43,6 +45,92 @@ if [[ "${1:-}" == "--brief" && -n "${2:-}" ]]; then
   SKIP_BRAINSTORM=true
 elif [[ "${1:-}" == http* ]]; then
   JD_URL="$1"
+elif [[ "${1:-}" == "status" ]]; then
+
+  # ── STATUS ──────────────────────────────────────────────────────────────────
+  echo ""
+  echo -e "${BOLD}FORA — Status${RESET}"
+  echo "──────────────────────────────────────────────────────"
+  echo ""
+
+  # Profile
+  if [[ -f "profile/profile.json" ]]; then
+    name=$(node -e "try{const p=require('./profile/profile.json');console.log(p.name||p.designer_name||'found')}catch(e){console.log('found')}" 2>/dev/null || echo "found")
+    modified=$(date -r "profile/profile.json" "+%Y-%m-%d" 2>/dev/null || echo "unknown")
+    ok "profile.json       $name · $modified"
+  else
+    echo -e "${RED}✗${RESET} profile.json       not found — run ./setup.sh"
+  fi
+
+  # Design system
+  if [[ -f "design-system/default.md" ]]; then
+    ok "design-system      default.md present"
+  else
+    warn "design-system      default.md missing — run ./setup.sh to restore"
+  fi
+
+  # API keys
+  ANTHROPIC_KEY=""
+  VERCEL_TOKEN=""
+  if [[ -f ".env" ]]; then
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+      k="${line%%=*}"; v="${line#*=}"
+      case "$k" in
+        ANTHROPIC_API_KEY) ANTHROPIC_KEY="$v" ;;
+        VERCEL_TOKEN)      VERCEL_TOKEN="$v" ;;
+      esac
+    done < ".env"
+  fi
+  echo ""
+  [[ -n "$ANTHROPIC_KEY" ]] && ok "Anthropic key      set" || echo -e "${DIM}  Anthropic key      not set${RESET}"
+  [[ -n "$VERCEL_TOKEN"  ]] && ok "Vercel token       set" || echo -e "${DIM}  Vercel token       not set${RESET}"
+
+  # Available options
+  echo ""
+  HAS_A=false; HAS_V=false
+  [[ -n "$ANTHROPIC_KEY" ]] && HAS_A=true
+  [[ -n "$VERCEL_TOKEN"  ]] && HAS_V=true
+  echo -e "  Available options:"
+  echo -e "  1 ${GREEN}✓${RESET}  Manual codegen + Manual deploy"
+  [[ "$HAS_V" == true ]]              && echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy via Vercel"   || echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy via Vercel  (needs Vercel token)${RESET}"
+  [[ "$HAS_A" == true ]]              && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via Anthropic + Manual deploy" || echo -e "  3 ${DIM}✗  Auto codegen via Anthropic + Manual deploy (needs Anthropic key)${RESET}"
+  [[ "$HAS_A" == true && "$HAS_V" == true ]] && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via Anthropic + Auto deploy via Vercel" || echo -e "  4 ${DIM}✗  Auto codegen via Anthropic + Auto deploy  (needs both keys)${RESET}"
+
+  # Recent briefs
+  echo ""
+  echo -e "  ${BOLD}Recent briefs:${RESET}"
+  briefs=$(ls -t briefs/*.json 2>/dev/null | grep -v "example-brief" | head -5 || true)
+  if [[ -z "$briefs" ]]; then
+    dim "    none yet"
+  else
+    while IFS= read -r f; do
+      modified=$(date -r "$f" "+%Y-%m-%d" 2>/dev/null || echo "")
+      echo -e "    $(basename "$f")  ${DIM}$modified${RESET}"
+    done <<< "$briefs"
+  fi
+
+  # Recent pages
+  echo ""
+  echo -e "  ${BOLD}Recent pages:${RESET}"
+  pages=$(find output -name "index.html" 2>/dev/null | xargs ls -t 2>/dev/null | head -5 || true)
+  if [[ -z "$pages" ]]; then
+    dim "    none yet"
+  else
+    while IFS= read -r f; do
+      modified=$(date -r "$f" "+%Y-%m-%d" 2>/dev/null || echo "")
+      slug=$(basename "$(dirname "$f")")
+      echo -e "    output/$slug/index.html  ${DIM}$modified${RESET}"
+    done <<< "$pages"
+  fi
+
+  echo ""
+  echo "──────────────────────────────────────────────────────"
+  echo -e "  ${BOLD}./run.sh${RESET}                        start a new application"
+  echo -e "  ${BOLD}./run.sh --brief briefs/[x].json${RESET}  skip brainstorm, regenerate page"
+  echo -e "  ${BOLD}./brainstorm.sh --recover [company]${RESET} save brief from clipboard (if JSON is copied but wasn't saved)"
+  echo ""
+  exit 0
 fi
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -92,7 +180,7 @@ else
     echo ""
     echo -e "  Job description URL:"
     echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-    read -r JD_URL < /dev/tty
+    flush_stdin; read -r JD_URL < /dev/tty
   fi
 
   echo ""
@@ -109,6 +197,11 @@ else
   SLUG=$(basename "$BRIEF_PATH" .json)
   ok "Brief ready: $BRIEF_PATH"
 fi
+
+echo ""
+echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
+echo -e "  Brainstorm complete. Now let's generate your page."
+echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
 
 # ════════════════════════════════════════════════════════════════════════════
 # STEP 2 — MODE SELECTION
@@ -142,7 +235,7 @@ fi
 echo ""
 
 echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-read -r MODE_CHOICE < /dev/tty
+flush_stdin; read -r MODE_CHOICE < /dev/tty
 
 # Validate choice against available keys
 case "$MODE_CHOICE" in
@@ -214,7 +307,7 @@ echo -e "  ${BOLD}Preview your page before deploying:${RESET}"
 echo -e "  ${DIM}file://$ABS_PATH${RESET}"
 echo ""
 echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-read -r LOOKS_GOOD < /dev/tty
+flush_stdin; read -r LOOKS_GOOD < /dev/tty
 
 if [[ "$LOOKS_GOOD" =~ ^[Nn]$ ]]; then
   echo ""

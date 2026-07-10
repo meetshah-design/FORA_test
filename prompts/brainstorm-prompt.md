@@ -16,8 +16,9 @@
 #   4. Paste the JD text (or URL if the AI can fetch it)
 #   5. The AI runs Phase 1 automatically, then opens Phase 2
 #   6. You refine or approve
-#   7. The AI outputs content_brief.json — save it to briefs/[slug].json
-#   8. Run: node generate.js --run briefs/[slug].json
+#   7. The AI outputs content_brief.json — copy the JSON block
+#   8. Switch back to terminal, press Enter when prompted — brief saves automatically
+#      Then FORA continues to generate + deploy
 #
 # ──────────────────────────────────────────────────────────────────────────
 # PAGE STRUCTURE — always three acts + a static wrapper
@@ -433,9 +434,10 @@ ASSETS CHECKLIST
 
 Then say:
 
-"Save any local files listed above to assets/. Then save the brief and run:
+"Copy the JSON above and switch back to your terminal. Press Enter when prompted — the brief will be saved automatically and FORA will continue to the next step.
 
-node generate.js --run briefs/[company-role-slug].json"
+If you have any local files listed in the assets checklist above, copy them to your assets/ folder:
+  cp ~/Desktop/your-file.png assets/"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## STANDING RULES

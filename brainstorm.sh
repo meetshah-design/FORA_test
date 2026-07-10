@@ -29,7 +29,7 @@ PROFILE_FILE="$SCRIPT_DIR/profile/profile.json"
 BRIEFS_DIR="$SCRIPT_DIR/briefs"
 
 # ── Ctrl+C exits cleanly ─────────────────────────────────────────────────────
-trap 'echo ""; echo "  Exited. Run ./brainstorm.sh to start again."; exit 0' INT
+trap 'echo ""; echo "  Exited."; echo "  Resume:   ./run.sh"; echo "  Recover:  ./brainstorm.sh --recover [company]  (if you have the JSON copied)"; exit 0' INT
 
 # ── Check dependencies ───────────────────────────────────────────────────────
 check_deps() {
@@ -43,6 +43,11 @@ check_deps() {
   if [[ ${#missing[@]} -gt 0 ]]; then
     fail "Missing dependencies: ${missing[*]}"
   fi
+}
+
+# ── Flush any buffered stdin (prevents clipboard paste bleeding into shell) ──
+flush_stdin() {
+  while read -r -t 0 _; do read -r _; done 2>/dev/null || true
 }
 
 # ── Copy to clipboard (cross-platform) ──────────────────────────────────────
@@ -137,7 +142,7 @@ save_brief() {
     echo "  2) Save as a new version (briefs/${slug}-v2.json)"
     echo "  3) Keep the existing brief and exit"
     echo ""
-    read -r choice < /dev/tty
+    flush_stdin; read -r choice < /dev/tty
     case "$choice" in
       1)
         info "Will overwrite briefs/${slug}.json"
@@ -179,7 +184,7 @@ save_brief() {
   # Wait for user — read from /dev/tty directly so stdin is not affected by paste
   echo -e "  Press Enter when you have the JSON copied..."
   echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-  read -r < /dev/tty
+  flush_stdin; read -r < /dev/tty
 
   # Read from clipboard (never from stdin — avoids JSON dumping into terminal)
   local content
@@ -220,7 +225,7 @@ save_brief() {
     echo ""
     echo -e "  Copy the JSON block and press Enter to try again..."
     echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-    read -r < /dev/tty
+    flush_stdin; read -r < /dev/tty
     content=$(paste_from_clipboard 2>/dev/null || true)
     echo "$content" | node -e "
       process.stdin.resume();
@@ -250,6 +255,27 @@ main() {
   echo "──────────────────────────────"
 
   check_deps
+
+  # ── Recovery mode: skip brainstorm, just save the brief from clipboard ───────
+  # Usage: ./brainstorm.sh --recover [slug]
+  # For when you already have the JSON in your clipboard but the brief wasn't saved.
+  if [[ "${1:-}" == "--recover" ]]; then
+    local slug="${2:-}"
+    if [[ -z "$slug" ]]; then
+      echo ""
+      echo "  What company is this brief for? (used as the filename)"
+      echo -e "  ${DIM}e.g. remote, linear, nola${RESET}"
+      flush_stdin; read -r slug < /dev/tty
+      slug=$(echo "$slug" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
+    fi
+    echo ""
+    echo -e "${BOLD}Recovery mode — saving brief from clipboard${RESET}"
+    echo ""
+    echo "  Make sure the content_brief.json is copied, then press Enter."
+    echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+    save_brief "$slug"
+    exit 0
+  fi
 
   # Get URL
   local jd_url="${1:-}"
@@ -340,7 +366,7 @@ ASSEMBLED
     echo -e "  Press Enter to continue to generate + deploy..."
     echo -e "  ${DIM}(Ctrl+C to stop here — resume later with: ./run.sh --brief briefs/${slug}.json)${RESET}"
     echo ""
-    read -r < /dev/tty
+    flush_stdin; read -r < /dev/tty
     echo ""
     exec "$SCRIPT_DIR/run.sh" --brief "$SCRIPT_DIR/briefs/${slug}.json"
   fi
