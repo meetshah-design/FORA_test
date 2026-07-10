@@ -42,7 +42,7 @@ Assemble sections in this order:
 
 ## SECTION-SPECIFIC RULES
 
-**nav:** The badge renders as `<span class="fora-nav__badge">`. Always include the img tag inside the badge span — fill `src` with the `company_logo_url` value from the brief and `alt` with the company name. The `onerror="this.style.display='none'"` attribute handles missing logos gracefully at runtime — do not conditionally omit the img. If `portfolio_url` is null, omit the portfolio link.
+**nav:** The badge renders as `<span class="fora-nav__badge">`. Always include an img tag inside the badge span — fill `src` with the value of `_meta.company_logo_url` from the brief (e.g. `https://logo.clearbit.com/nola.money`) and `alt` with `_meta.company`. Always add `onerror="this.style.display='none'"` so broken images disappear silently. Do not skip this img even if you are unsure the URL works — the onerror handles it. If `static_wrapper.portfolio_url` is null, omit the portfolio link.
 
 **act1_hero:** philosophy_note renders as `<p class="fora-philosophy-note">` — italic, no quotation marks. Signal pills render as `<span class="fora-signal-pill">` inside `.fora-signals-row`.
 
