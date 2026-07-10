@@ -12,6 +12,9 @@
 
 set -e
 
+# Redirect stdin from terminal device — prevents clipboard content ever reaching stdin
+exec < /dev/tty
+
 # ── Colours ──────────────────────────────────────────────────────────────────
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -149,164 +152,205 @@ else
 fi
 
 # ════════════════════════════════════════════════════════════════════════════
-# CHECK 5 — Mode + API keys
+# CHECK 5 — API keys
 # ════════════════════════════════════════════════════════════════════════════
-step "5/5" "Mode & API keys"
+step "5/5" "API keys"
 
-# Load .env if it exists
 ENV_FILE=".env"
 ANTHROPIC_KEY=""
+GEMINI_KEY=""
+OPENAI_KEY=""
 VERCEL_TOKEN=""
-VERCEL_PROJECT=""
+VERCEL_PROJECT="fora-pages"
 
+# Load existing .env
 if [[ -f "$ENV_FILE" ]]; then
   while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
-    key="${line%%=*}"
-    val="${line#*=}"
-    val="${val%\"}"
-    val="${val#\"}"
-    case "$key" in
-      ANTHROPIC_API_KEY)   ANTHROPIC_KEY="$val" ;;
-      VERCEL_TOKEN)        VERCEL_TOKEN="$val" ;;
-      VERCEL_PROJECT_NAME) VERCEL_PROJECT="$val" ;;
+    k="${line%%=*}"; v="${line#*=}"
+    v="${v%\"*}"; v="${v#\"}"
+    case "$k" in
+      ANTHROPIC_API_KEY)   ANTHROPIC_KEY="$v" ;;
+      GEMINI_API_KEY)      GEMINI_KEY="$v" ;;
+      OPENAI_API_KEY)      OPENAI_KEY="$v" ;;
+      VERCEL_TOKEN)        VERCEL_TOKEN="$v" ;;
+      VERCEL_PROJECT_NAME) VERCEL_PROJECT="$v" ;;
     esac
   done < "$ENV_FILE"
 fi
 
-# Determine current mode from keys present
-if [[ -n "$ANTHROPIC_KEY" && -n "$VERCEL_TOKEN" ]]; then
-  CURRENT_MODE=3
-elif [[ -n "$ANTHROPIC_KEY" && -z "$VERCEL_TOKEN" ]]; then
-  CURRENT_MODE="2a"
-elif [[ -z "$ANTHROPIC_KEY" && -n "$VERCEL_TOKEN" ]]; then
-  CURRENT_MODE="2b"
+# Summarise current state
+HAS_AI=false
+HAS_VERCEL=false
+AI_PROVIDER_NAME=""
+{ [[ -n "$ANTHROPIC_KEY" ]] || [[ -n "$GEMINI_KEY" ]] || [[ -n "$OPENAI_KEY" ]]; } && HAS_AI=true
+[[ -n "$VERCEL_TOKEN" ]] && HAS_VERCEL=true
+[[ -n "$ANTHROPIC_KEY" ]] && AI_PROVIDER_NAME="Anthropic"
+[[ -n "$GEMINI_KEY"    ]] && AI_PROVIDER_NAME="Gemini"
+[[ -n "$OPENAI_KEY"    ]] && AI_PROVIDER_NAME="OpenAI"
+
+if [[ "$HAS_AI" == true ]]; then
+  ok "AI key set (${AI_PROVIDER_NAME}) — auto codegen available"
 else
-  CURRENT_MODE=1
+  dim "  No AI key — manual codegen only (paste into AI chat)"
 fi
 
-# Print current mode status
-case "$CURRENT_MODE" in
-  1)
-    ok "Mode 1 — Fully manual (no API keys configured)"
-    dim "  Codegen: paste manually into AI chat"
-    dim "  Deploy:  drag to Netlify drop or any static host"
-    ;;
-  2a)
-    ok "Mode 2A — Automated codegen (Anthropic configured)"
-    dim "  Codegen: node generate.js --run"
-    dim "  Deploy:  drag to Netlify or add Vercel token for Mode 3"
-    ;;
-  2b)
-    ok "Mode 2B — Manual codegen + auto deploy (Vercel configured) ★"
-    dim "  Codegen: paste manually into AI chat"
-    dim "  Deploy:  node generate.js --deploy"
-    ;;
-  3)
-    ok "Mode 3 — Fully automated (Anthropic + Vercel configured)"
-    dim "  Codegen: node generate.js --run"
-    dim "  Deploy:  node generate.js --publish"
-    ;;
-esac
+if [[ "$HAS_VERCEL" == true ]]; then
+  ok "Vercel token set — auto deploy available"
+else
+  dim "  No Vercel token — manual deploy only (Netlify drop or any static host)"
+fi
 
-# Offer mode change if not check-only
+# ── Conversational key setup (skip if --check) ──────────────────────────────
 if ! $CHECK_ONLY; then
-  echo ""
-  echo -e "  ${DIM}Want to switch mode or update your keys? (y/N)${RESET}"
-  read -r SWITCH_MODE
-  if [[ "$SWITCH_MODE" =~ ^[Yy]$ ]]; then
+
+  # Only prompt if no keys exist OR user is on a re-run and things changed
+  NEEDS_SETUP=false
+  [[ ! -f "$ENV_FILE" ]] && NEEDS_SETUP=true
+
+  if [[ "$NEEDS_SETUP" == false ]]; then
     echo ""
-    echo "  Which mode do you want to use?"
+    echo -e "  ${DIM}Update or add API keys? (y/N)${RESET}"
+    read -r DO_SETUP
+    [[ "$DO_SETUP" =~ ^[Yy]$ ]] && NEEDS_SETUP=true
+  fi
+
+  if [[ "$NEEDS_SETUP" == true ]]; then
     echo ""
-    echo "  1) Fully manual          — free, no API keys"
-    echo "     Codegen in AI chat. Deploy via Netlify drag-and-drop."
+    echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
+    echo -e "${BOLD}Key setup${RESET}"
+    echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
+
+    # ── Question 1: AI key ─────────────────────────────────────────────────
     echo ""
-    echo "  2) Manual codegen + auto deploy  ★  — Vercel token only"
-    echo "     Codegen in AI chat (zero cost). One command to get a live URL."
+    echo "  Do you have an AI API key? (used for auto codegen — options 3 + 4)"
+    echo -e "  ${DIM}If not, you can always generate in AI chat for free — skip for now.${RESET}"
     echo ""
-    echo "  3) Automated codegen + manual deploy  — Anthropic key only"
-    echo "     generate.js handles HTML. Deploy manually."
+    echo "  1) Anthropic Claude  — console.anthropic.com/settings/keys"
+    echo "  2) Google Gemini     — aistudio.google.com/app/apikey"
+    echo "  3) OpenAI            — platform.openai.com/api-keys"
+    echo "  4) Skip — no AI key"
     echo ""
-    echo "  4) Fully automated  — Anthropic + Vercel"
-    echo "     One command from brief to live URL."
-    echo ""
-    read -rp "  Mode (1/2/3/4): " MODE_CHOICE
+    echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+    read -r AI_CHOICE
 
     NEW_ANTHROPIC=""
-    NEW_VERCEL=""
-    NEW_PROJECT=""
+    NEW_GEMINI=""
+    NEW_OPENAI=""
 
-    case "$MODE_CHOICE" in
+    case "$AI_CHOICE" in
       1)
         echo ""
-        echo "  Mode 1: You'll paste codegen-prompt.md + your brief into any AI chat."
-        echo "          Cost: \$0 per application."
-        echo ""
-        ok "Mode 1 selected. No API keys needed."
-        # Clear keys if .env exists
-        if [[ -f "$ENV_FILE" ]]; then
-          sed -i.bak 's/^ANTHROPIC_API_KEY=.*/ANTHROPIC_API_KEY=/' "$ENV_FILE"
-          sed -i.bak 's/^VERCEL_TOKEN=.*/VERCEL_TOKEN=/' "$ENV_FILE"
-          rm -f "${ENV_FILE}.bak"
+        echo -e "  Paste your Anthropic key:"
+        echo -e "  ${DIM}(starts with sk-ant-)${RESET}"
+        read -r NEW_ANTHROPIC
+        if [[ -n "$NEW_ANTHROPIC" ]]; then
+          ok "Anthropic key received"
         fi
         ;;
       2)
         echo ""
-        echo "  Mode 2B: You'll paste codegen-prompt.md + your brief into any AI chat."
-        echo "           Vercel handles deploy automatically."
-        echo "           Cost: \$0 per application."
-        echo ""
-        read -rp "  Paste your Vercel token: " NEW_VERCEL
-        NEW_PROJECT="${VERCEL_PROJECT:-fora-pages}"
-        read -rp "  Vercel project name [${NEW_PROJECT}]: " INPUT_PROJECT
-        [[ -n "$INPUT_PROJECT" ]] && NEW_PROJECT="$INPUT_PROJECT"
+        echo -e "  Paste your Gemini key:"
+        echo -e "  ${DIM}(starts with AIza)${RESET}"
+        read -r NEW_GEMINI
+        if [[ -n "$NEW_GEMINI" ]]; then
+          ok "Gemini key received"
+        fi
         ;;
       3)
         echo ""
-        echo "  Mode 2A: generate.js calls the Anthropic API to build your HTML automatically."
-        echo "           Deploy the output manually (Netlify, GitHub Pages, etc.)"
-        echo ""
-        read -rp "  Paste your Anthropic API key: " NEW_ANTHROPIC
+        echo -e "  Paste your OpenAI key:"
+        echo -e "  ${DIM}(starts with sk-)${RESET}"
+        read -r NEW_OPENAI
+        if [[ -n "$NEW_OPENAI" ]]; then
+          ok "OpenAI key received"
+        fi
         ;;
-      4)
-        echo ""
-        echo "  Mode 3: generate.js builds your HTML and deploys to Vercel in one command."
-        echo ""
-        read -rp "  Paste your Anthropic API key: " NEW_ANTHROPIC
-        read -rp "  Paste your Vercel token: " NEW_VERCEL
-        NEW_PROJECT="${VERCEL_PROJECT:-fora-pages}"
-        read -rp "  Vercel project name [${NEW_PROJECT}]: " INPUT_PROJECT
-        [[ -n "$INPUT_PROJECT" ]] && NEW_PROJECT="$INPUT_PROJECT"
-        ;;
-      *)
-        warn "Unrecognised choice. Keeping current mode."
+      4|*)
+        dim "  Skipping AI key — option 1 and 2 will always be available."
         ;;
     esac
 
-    # Write .env
-    if [[ -n "$NEW_ANTHROPIC" || -n "$NEW_VERCEL" || "$MODE_CHOICE" == "1" ]]; then
-      cp .env.example "$ENV_FILE" 2>/dev/null || touch "$ENV_FILE"
-      # Write cleanly from .env.example structure
-      {
-        echo "# FORA — Environment Variables"
-        echo "# Generated by setup.sh — re-run setup.sh to change mode or update keys"
+    # ── Question 2: Vercel ─────────────────────────────────────────────────
+    echo ""
+    echo "  Do you have a Vercel token? (used for auto deploy — options 2 + 4)"
+    echo -e "  ${DIM}Gets you a permanent live URL with one command. Free tier works.${RESET}"
+    echo -e "  ${DIM}Get one at: vercel.com/account/tokens${RESET}"
+    echo ""
+    echo "  1) Yes — paste my token"
+    echo "  2) Skip — I'll deploy manually"
+    echo ""
+    echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+    read -r VERCEL_CHOICE
+
+    NEW_VERCEL=""
+    NEW_PROJECT="$VERCEL_PROJECT"
+
+    case "$VERCEL_CHOICE" in
+      1)
         echo ""
-        echo "# Anthropic — Mode 2A + 3 only"
-        echo "ANTHROPIC_API_KEY=${NEW_ANTHROPIC}"
-        echo ""
-        echo "# Model override (optional)"
-        echo "AI_MODEL="
-        echo ""
-        echo "# Vercel — Mode 2B + 3 only"
-        echo "VERCEL_TOKEN=${NEW_VERCEL}"
-        echo "VERCEL_PROJECT_NAME=${NEW_PROJECT:-fora-pages}"
-        echo "DEPLOY_DOMAIN="
-        echo ""
-        echo "# PostHog — optional, V1 feature"
-        echo "POSTHOG_API_KEY="
-      } > "$ENV_FILE"
-      ok ".env written"
-    fi
+        echo -e "  Paste your Vercel token:"
+        read -r NEW_VERCEL
+        if [[ -n "$NEW_VERCEL" ]]; then
+          ok "Vercel token received"
+          echo ""
+          echo -e "  Vercel project name to deploy under:"
+          echo -e "  ${DIM}Press Enter to use the default: fora-pages${RESET}"
+          read -r INPUT_PROJECT
+          [[ -n "$INPUT_PROJECT" ]] && NEW_PROJECT="$INPUT_PROJECT"
+        fi
+        ;;
+      2|*)
+        dim "  Skipping Vercel — you can drag your output/ folder to netlify.com/drop."
+        ;;
+    esac
+
+    # ── Write .env ─────────────────────────────────────────────────────────
+    FINAL_ANTHROPIC="${NEW_ANTHROPIC:-$ANTHROPIC_KEY}"
+    FINAL_GEMINI="${NEW_GEMINI:-$GEMINI_KEY}"
+    FINAL_OPENAI="${NEW_OPENAI:-$OPENAI_KEY}"
+    FINAL_VERCEL="${NEW_VERCEL:-$VERCEL_TOKEN}"
+    FINAL_PROJECT="${NEW_PROJECT:-fora-pages}"
+
+    {
+      echo "# FORA — Environment Variables"
+      echo "# Generated by setup.sh — re-run setup.sh to update keys"
+      echo ""
+      echo "# AI provider — add ONE key (FORA auto-detects which to use)"
+      echo "# Options 3 + 4 only — not required for options 1 or 2"
+      echo "ANTHROPIC_API_KEY=${FINAL_ANTHROPIC}"
+      echo "GEMINI_API_KEY=${FINAL_GEMINI}"
+      echo "OPENAI_API_KEY=${FINAL_OPENAI}"
+      echo ""
+      echo "# Optional — override model or force a specific provider"
+      echo "AI_MODEL="
+      echo "AI_PROVIDER="
+      echo ""
+      echo "# Vercel — options 2 + 4 only"
+      echo "VERCEL_TOKEN=${FINAL_VERCEL}"
+      echo "VERCEL_PROJECT_NAME=${FINAL_PROJECT}"
+      echo "DEPLOY_DOMAIN="
+      echo ""
+      echo "# PostHog — optional, V1 feature"
+      echo "POSTHOG_API_KEY="
+    } > "$ENV_FILE"
+
+    echo ""
+    ok ".env saved"
+
+    # Re-read final state for summary
+    ANTHROPIC_KEY="$FINAL_ANTHROPIC"
+    GEMINI_KEY="$FINAL_GEMINI"
+    OPENAI_KEY="$FINAL_OPENAI"
+    VERCEL_TOKEN="$FINAL_VERCEL"
+    HAS_AI=false
+    HAS_VERCEL=false
+    AI_PROVIDER_NAME=""
+    { [[ -n "$ANTHROPIC_KEY" ]] || [[ -n "$GEMINI_KEY" ]] || [[ -n "$OPENAI_KEY" ]]; } && HAS_AI=true
+    [[ -n "$VERCEL_TOKEN" ]] && HAS_VERCEL=true
+    [[ -n "$ANTHROPIC_KEY" ]] && AI_PROVIDER_NAME="Anthropic"
+    [[ -n "$GEMINI_KEY"    ]] && AI_PROVIDER_NAME="Gemini"
+    [[ -n "$OPENAI_KEY"    ]] && AI_PROVIDER_NAME="OpenAI"
   fi
 fi
 
@@ -320,60 +364,24 @@ if [[ "$EXIT_CODE" -eq 0 ]]; then
   echo -e "${GREEN}${BOLD}FORA is ready.${RESET}"
   echo ""
 
-  # Print the right next-step based on current mode
-  # Re-read .env to get final state
-  FINAL_ANTHROPIC=""
-  FINAL_VERCEL=""
-  if [[ -f "$ENV_FILE" ]]; then
-    while IFS= read -r line || [[ -n "$line" ]]; do
-      [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
-      k="${line%%=*}"; v="${line#*=}"
-      [[ "$k" == "ANTHROPIC_API_KEY" ]] && FINAL_ANTHROPIC="$v"
-      [[ "$k" == "VERCEL_TOKEN" ]]      && FINAL_VERCEL="$v"
-    done < "$ENV_FILE"
-  fi
-
-  if [[ -n "$FINAL_ANTHROPIC" && -n "$FINAL_VERCEL" ]]; then
-    echo "  Your workflow (Mode 3 — fully automated):"
-    echo ""
-    dim "  Per application:"
-    echo "  1.  ./brainstorm.sh https://company.com/jobs/role"
-    echo "      → paste into AI chat → save brief to briefs/[slug].json"
-    echo "  2.  node generate.js --publish briefs/[slug].json"
-    echo "      → live URL returned"
-  elif [[ -n "$FINAL_ANTHROPIC" ]]; then
-    echo "  Your workflow (Mode 2A — auto codegen):"
-    echo ""
-    dim "  Per application:"
-    echo "  1.  ./brainstorm.sh https://company.com/jobs/role"
-    echo "      → paste into AI chat → save brief to briefs/[slug].json"
-    echo "  2.  node generate.js --run briefs/[slug].json"
-    echo "      → open output/[slug]/index.html in browser"
-    echo "  3.  Deploy manually (Netlify drop, GitHub Pages, etc.)"
-  elif [[ -n "$FINAL_VERCEL" ]]; then
-    echo "  Your workflow (Mode 2B — manual codegen, auto deploy) ★"
-    echo ""
-    dim "  Per application:"
-    echo "  1.  ./brainstorm.sh https://company.com/jobs/role"
-    echo "      → paste into AI chat → save brief to briefs/[slug].json"
-    echo "  2.  Open AI chat → paste prompts/codegen-prompt.md + brief"
-    echo "      → save HTML to output/[slug]/index.html"
-    echo "  3.  node generate.js --deploy briefs/[slug].json"
-    echo "      → live URL returned"
-  else
-    echo "  Your workflow (Mode 1 — fully manual):"
-    echo ""
-    dim "  Per application:"
-    echo "  1.  ./brainstorm.sh https://company.com/jobs/role"
-    echo "      → paste into AI chat → save brief to briefs/[slug].json"
-    echo "  2.  Open AI chat → paste prompts/codegen-prompt.md + brief"
-    echo "      → save HTML to output/[slug]/index.html"
-    echo "  3.  Drag output/[slug]/ to https://app.netlify.com/drop"
-    echo "      → live URL returned"
-  fi
+  # Show which options are unlocked
+  echo -e "  ${BOLD}Available options:${RESET}"
+  echo -e "  1 ${GREEN}✓${RESET}  Manual codegen + Manual deploy  ${DIM}(always free)${RESET}"
+  [[ "$HAS_VERCEL" == true ]] \
+    && echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy via Vercel" \
+    || echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy  (add Vercel token — vercel.com/account/tokens)${RESET}"
+  [[ "$HAS_AI" == true ]] \
+    && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via ${AI_PROVIDER_NAME} + Manual deploy" \
+    || echo -e "  3 ${DIM}✗  Auto codegen + Manual deploy  (add an AI key)${RESET}"
+  [[ "$HAS_AI" == true && "$HAS_VERCEL" == true ]] \
+    && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via ${AI_PROVIDER_NAME} + Auto deploy via Vercel" \
+    || echo -e "  4 ${DIM}✗  Auto codegen + Auto deploy    (add AI key + Vercel token)${RESET}"
 
   echo ""
-  dim "  Re-run ./setup.sh anytime to check your setup or switch mode."
+  echo -e "  ${BOLD}Start your first application:${RESET}"
+  echo -e "  ${BOLD}./run.sh${RESET}"
+  echo ""
+  dim "  Re-run ./setup.sh anytime to check your setup or update keys."
 else
   echo -e "${YELLOW}${BOLD}Setup incomplete.${RESET} Fix the issues above and run ./setup.sh again."
 fi
