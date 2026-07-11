@@ -82,7 +82,7 @@ By the end of this guide:
 ✓ A personalised application landing page
 ✓ A live URL you can send in a cold message (options 2 + 4 only)
 
-Result: https://fora-pages.vercel.app/company-role
+Result: https://meet-shah.vercel.app/company-role   (your name, your URL)
 ```
 
 ---
@@ -265,11 +265,18 @@ GEMINI_API_KEY=your_key_here
 OPENAI_API_KEY=your_key_here
 ```
 
-For auto deploy (options 2 + 4) — add your Vercel token:
+For auto deploy (options 2 + 4) — add your Vercel token and set your project name:
 ```
 VERCEL_TOKEN=your_vercel_token
-VERCEL_PROJECT_NAME=fora-pages
+VERCEL_PROJECT_NAME=meet-shah    # use your name — this becomes your URL
 ```
+
+Your deploy URL will be `https://[project-name].vercel.app/[company]`. Use your name so it looks like yours, not a shared tool. If you have a custom domain (e.g. `apply.yourname.com`), add it too:
+```
+DEPLOY_DOMAIN=apply.yourname.com
+```
+
+Tip: run `./setup.sh` instead of editing `.env` manually — it suggests your project name automatically from your profile.json and walks you through the rest conversationally.
 
 To get your Vercel token: go to [vercel.com/account/tokens](https://vercel.com/account/tokens) → Create Token.
 
@@ -392,9 +399,9 @@ In your terminal — replace `[company]` with your brief filename:
 node generate.js --deploy briefs/[company].json
 ```
 
-Returns a live URL: `https://fora-pages.vercel.app/[company]`
+Returns a live URL: `https://[your-project-name].vercel.app/[company]` (or your custom domain if you set one).
 
-Your Vercel project must exist before the first deploy — create it once at [vercel.com/new](https://vercel.com/new) (empty project, no framework, no git connection needed).
+Your Vercel project must exist before the first deploy — create it once at [vercel.com/new](https://vercel.com/new) (empty project, no framework, no git connection needed). The project name must match `VERCEL_PROJECT_NAME` in your `.env`.
 
 ---
 

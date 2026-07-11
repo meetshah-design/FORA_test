@@ -71,28 +71,92 @@ elif [[ "${1:-}" == "status" ]]; then
     warn "design-system      default.md missing — run ./setup.sh to restore"
   fi
 
-  # API keys
+  # API keys + model + deploy config
   ANTHROPIC_KEY=""
   GEMINI_KEY=""
   OPENAI_KEY=""
   VERCEL_TOKEN=""
+  VERCEL_PROJECT_STATUS=""
+  DEPLOY_DOMAIN_STATUS=""
+  AI_MODEL_ENV=""
+  AI_PROVIDER_ENV=""
   if [[ -f ".env" ]]; then
     while IFS= read -r line || [[ -n "$line" ]]; do
       [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
       k="${line%%=*}"; v="${line#*=}"
       case "$k" in
-        ANTHROPIC_API_KEY) ANTHROPIC_KEY="$v" ;;
-        GEMINI_API_KEY)    GEMINI_KEY="$v" ;;
-        OPENAI_API_KEY)    OPENAI_KEY="$v" ;;
-        VERCEL_TOKEN)      VERCEL_TOKEN="$v" ;;
+        ANTHROPIC_API_KEY)   ANTHROPIC_KEY="$v" ;;
+        GEMINI_API_KEY)      GEMINI_KEY="$v" ;;
+        OPENAI_API_KEY)      OPENAI_KEY="$v" ;;
+        VERCEL_TOKEN)        VERCEL_TOKEN="$v" ;;
+        VERCEL_PROJECT_NAME) VERCEL_PROJECT_STATUS="$v" ;;
+        DEPLOY_DOMAIN)       DEPLOY_DOMAIN_STATUS="$v" ;;
+        AI_MODEL)            AI_MODEL_ENV="$v" ;;
+        AI_PROVIDER)         AI_PROVIDER_ENV="$v" ;;
       esac
     done < ".env"
   fi
+
+  # Determine active provider + default model
+  ACTIVE_PROVIDER=""
+  DEFAULT_MODEL=""
+  if [[ -n "$AI_PROVIDER_ENV" ]]; then
+    ACTIVE_PROVIDER="$AI_PROVIDER_ENV"
+  elif [[ -n "$ANTHROPIC_KEY" ]]; then
+    ACTIVE_PROVIDER="anthropic"
+  elif [[ -n "$GEMINI_KEY" ]]; then
+    ACTIVE_PROVIDER="gemini"
+  elif [[ -n "$OPENAI_KEY" ]]; then
+    ACTIVE_PROVIDER="openai"
+  fi
+  case "$ACTIVE_PROVIDER" in
+    anthropic) DEFAULT_MODEL="claude-opus-4-5" ;;
+    gemini)    DEFAULT_MODEL="gemini-2.0-flash" ;;
+    openai)    DEFAULT_MODEL="gpt-4o" ;;
+  esac
+  ACTIVE_MODEL="${AI_MODEL_ENV:-$DEFAULT_MODEL}"
+
+  # Build deploy URL preview
+  DEPLOY_URL_PREVIEW=""
+  if [[ -n "$VERCEL_TOKEN" ]]; then
+    if [[ -n "$DEPLOY_DOMAIN_STATUS" ]]; then
+      DEPLOY_URL_PREVIEW="https://${DEPLOY_DOMAIN_STATUS}/[company]"
+    elif [[ -n "$VERCEL_PROJECT_STATUS" ]]; then
+      DEPLOY_URL_PREVIEW="https://${VERCEL_PROJECT_STATUS}.vercel.app/[company]"
+    fi
+  fi
+
   echo ""
-  [[ -n "$ANTHROPIC_KEY" ]] && ok "Anthropic key      set" || echo -e "${DIM}  Anthropic key      not set${RESET}"
-  [[ -n "$GEMINI_KEY"    ]] && ok "Gemini key         set" || echo -e "${DIM}  Gemini key         not set${RESET}"
-  [[ -n "$OPENAI_KEY"    ]] && ok "OpenAI key         set" || echo -e "${DIM}  OpenAI key         not set${RESET}"
-  [[ -n "$VERCEL_TOKEN"  ]] && ok "Vercel token       set" || echo -e "${DIM}  Vercel token       not set${RESET}"
+  if [[ -n "$ANTHROPIC_KEY" ]]; then
+    [[ "$ACTIVE_PROVIDER" == "anthropic" ]] \
+      && ok "Anthropic          active · model: ${ACTIVE_MODEL}" \
+      || ok "Anthropic key      set ${DIM}(not active — AI_PROVIDER=${AI_PROVIDER_ENV})${RESET}"
+  else
+    echo -e "${DIM}  Anthropic          not set${RESET}"
+  fi
+  if [[ -n "$GEMINI_KEY" ]]; then
+    [[ "$ACTIVE_PROVIDER" == "gemini" ]] \
+      && ok "Gemini             active · model: ${ACTIVE_MODEL}" \
+      || ok "Gemini key         set ${DIM}(not active — AI_PROVIDER=${AI_PROVIDER_ENV})${RESET}"
+  else
+    echo -e "${DIM}  Gemini             not set${RESET}"
+  fi
+  if [[ -n "$OPENAI_KEY" ]]; then
+    [[ "$ACTIVE_PROVIDER" == "openai" ]] \
+      && ok "OpenAI             active · model: ${ACTIVE_MODEL}" \
+      || ok "OpenAI key         set ${DIM}(not active — AI_PROVIDER=${AI_PROVIDER_ENV})${RESET}"
+  else
+    echo -e "${DIM}  OpenAI             not set${RESET}"
+  fi
+  if [[ -n "$VERCEL_TOKEN" ]]; then
+    ok "Vercel             set · ${DEPLOY_URL_PREVIEW}"
+  else
+    echo -e "${DIM}  Vercel             not set${RESET}"
+  fi
+  echo ""
+  if [[ -n "$ACTIVE_PROVIDER" ]]; then
+    dim "  To update keys or model: ./setup.sh"
+  fi
 
   # Available options
   echo ""
@@ -101,9 +165,15 @@ elif [[ "${1:-}" == "status" ]]; then
   [[ -n "$VERCEL_TOKEN"  ]] && HAS_V=true
   echo -e "  Available options:"
   echo -e "  1 ${GREEN}✓${RESET}  Manual codegen + Manual deploy"
-  [[ "$HAS_V" == true ]]              && echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy via Vercel"   || echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy via Vercel  (needs Vercel token)${RESET}"
-  [[ "$HAS_A" == true ]]              && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via AI API + Manual deploy"    || echo -e "  3 ${DIM}✗  Auto codegen via AI API + Manual deploy   (needs Anthropic, Gemini, or OpenAI key)${RESET}"
-  [[ "$HAS_A" == true && "$HAS_V" == true ]] && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via AI API + Auto deploy via Vercel" || echo -e "  4 ${DIM}✗  Auto codegen via AI API + Auto deploy     (needs AI key + Vercel token)${RESET}"
+  [[ "$HAS_V" == true ]] \
+    && echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy  ${DIM}→ ${DEPLOY_URL_PREVIEW}${RESET}" \
+    || echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy  (needs Vercel token — run ./setup.sh)${RESET}"
+  [[ "$HAS_A" == true ]] \
+    && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via AI API + Manual deploy" \
+    || echo -e "  3 ${DIM}✗  Auto codegen + Manual deploy  (needs AI key — run ./setup.sh)${RESET}"
+  [[ "$HAS_A" == true && "$HAS_V" == true ]] \
+    && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via AI API + Auto deploy  ${DIM}→ ${DEPLOY_URL_PREVIEW}${RESET}" \
+    || echo -e "  4 ${DIM}✗  Auto codegen + Auto deploy    (needs AI key + Vercel token — run ./setup.sh)${RESET}"
 
   # Recent briefs
   echo ""

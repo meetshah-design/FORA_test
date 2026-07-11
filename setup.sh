@@ -161,7 +161,9 @@ ANTHROPIC_KEY=""
 GEMINI_KEY=""
 OPENAI_KEY=""
 VERCEL_TOKEN=""
-VERCEL_PROJECT="fora-pages"
+VERCEL_PROJECT=""
+DEPLOY_DOMAIN=""
+AI_MODEL_SET=""
 
 # Load existing .env
 if [[ -f "$ENV_FILE" ]]; then
@@ -175,9 +177,21 @@ if [[ -f "$ENV_FILE" ]]; then
       OPENAI_API_KEY)      OPENAI_KEY="$v" ;;
       VERCEL_TOKEN)        VERCEL_TOKEN="$v" ;;
       VERCEL_PROJECT_NAME) VERCEL_PROJECT="$v" ;;
+      DEPLOY_DOMAIN)       DEPLOY_DOMAIN="$v" ;;
+      AI_MODEL)            AI_MODEL_SET="$v" ;;
     esac
   done < "$ENV_FILE"
 fi
+
+# Derive suggested project name from profile.json (slugified designer name)
+SUGGESTED_PROJECT=""
+if [[ -f "profile/profile.json" ]]; then
+  PROFILE_NAME=$(node -e "try{const p=require('./profile/profile.json');console.log(p.identity?.name||'')}catch(e){}" 2>/dev/null || echo "")
+  if [[ -n "$PROFILE_NAME" ]]; then
+    SUGGESTED_PROJECT=$(echo "$PROFILE_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9-]//g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+  fi
+fi
+[[ -z "$SUGGESTED_PROJECT" ]] && SUGGESTED_PROJECT="fora-pages"
 
 # Summarise current state
 HAS_AI=false
@@ -196,7 +210,13 @@ else
 fi
 
 if [[ "$HAS_VERCEL" == true ]]; then
-  ok "Vercel token set — auto deploy available"
+  # Show what the deploy URL actually looks like
+  CURRENT_PROJECT="${VERCEL_PROJECT:-$SUGGESTED_PROJECT}"
+  if [[ -n "$DEPLOY_DOMAIN" ]]; then
+    ok "Vercel token set — deploy URL: https://${DEPLOY_DOMAIN}/[company]"
+  else
+    ok "Vercel token set — deploy URL: https://${CURRENT_PROJECT}.vercel.app/[company]"
+  fi
 else
   dim "  No Vercel token — manual deploy only (Netlify drop or any static host)"
 fi
@@ -327,7 +347,12 @@ if ! $CHECK_ONLY; then
     # ── Question 2: Vercel ─────────────────────────────────────────────────
     echo ""
     if [[ "$HAS_VERCEL" == true ]]; then
-      echo -e "  Vercel token already set — replace it or skip to keep it."
+      CURRENT_PROJECT="${VERCEL_PROJECT:-$SUGGESTED_PROJECT}"
+      if [[ -n "$DEPLOY_DOMAIN" ]]; then
+        echo -e "  Vercel already set — deploy URL: ${DIM}https://${DEPLOY_DOMAIN}/[company]${RESET}"
+      else
+        echo -e "  Vercel already set — deploy URL: ${DIM}https://${CURRENT_PROJECT}.vercel.app/[company]${RESET}"
+      fi
     else
       echo "  Do you have a Vercel token? (used for auto deploy — options 2 + 4)"
       echo -e "  ${DIM}Gets you a permanent live URL with one command. Free tier works.${RESET}"
@@ -335,13 +360,47 @@ if ! $CHECK_ONLY; then
     fi
     echo ""
     echo "  1) Paste a new token"
-    [[ "$HAS_VERCEL" == true ]] && echo "  2) Keep existing token" || echo "  2) Skip — I'll deploy manually"
+    if [[ "$HAS_VERCEL" == true ]]; then
+      echo "  2) Update project name / custom domain  ${DIM}(keep existing token)${RESET}"
+      echo "  3) Keep everything as-is"
+    else
+      echo "  2) Skip — I'll deploy manually"
+    fi
     echo ""
     echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
     read -r VERCEL_CHOICE
 
     NEW_VERCEL=""
-    NEW_PROJECT="$VERCEL_PROJECT"
+    NEW_PROJECT="${VERCEL_PROJECT:-$SUGGESTED_PROJECT}"
+    NEW_DOMAIN="${DEPLOY_DOMAIN}"
+
+    # Helper: ask project name + domain questions
+    ask_project_and_domain() {
+      echo ""
+      echo -e "  What should your Vercel project be called?"
+      echo -e "  ${DIM}This becomes your URL: [project-name].vercel.app/[company]${RESET}"
+      echo -e "  ${DIM}Press Enter to use: ${NEW_PROJECT}${RESET}"
+      read -r INPUT_PROJECT
+      [[ -n "$INPUT_PROJECT" ]] && NEW_PROJECT="$INPUT_PROJECT"
+      ok "Project: ${NEW_PROJECT} → https://${NEW_PROJECT}.vercel.app/[company]"
+
+      echo ""
+      echo -e "  Custom domain? (e.g. apply.yourname.com)"
+      echo -e "  ${DIM}If yes, pages deploy to https://[domain]/[company] instead.${RESET}"
+      if [[ -n "$NEW_DOMAIN" ]]; then
+        echo -e "  ${DIM}Current: ${NEW_DOMAIN} — press Enter to keep, or type a new one${RESET}"
+      else
+        echo -e "  ${DIM}Leave blank to skip — you can add this later.${RESET}"
+      fi
+      read -r INPUT_DOMAIN
+      if [[ -n "$INPUT_DOMAIN" ]]; then
+        NEW_DOMAIN="$INPUT_DOMAIN"
+        ok "Custom domain: https://${NEW_DOMAIN}/[company]"
+        dim "  Remember to add this domain in Vercel dashboard → your project → Settings → Domains"
+      elif [[ -n "$NEW_DOMAIN" ]]; then
+        ok "Keeping domain: https://${NEW_DOMAIN}/[company]"
+      fi
+    }
 
     case "$VERCEL_CHOICE" in
       1)
@@ -350,16 +409,20 @@ if ! $CHECK_ONLY; then
         read -r NEW_VERCEL
         if [[ -n "$NEW_VERCEL" ]]; then
           ok "Vercel token received"
-          echo ""
-          echo -e "  Vercel project name to deploy under:"
-          echo -e "  ${DIM}Press Enter to keep: ${VERCEL_PROJECT}${RESET}"
-          read -r INPUT_PROJECT
-          [[ -n "$INPUT_PROJECT" ]] && NEW_PROJECT="$INPUT_PROJECT"
+          ask_project_and_domain
         fi
         ;;
-      2|*)
+      2)
         if [[ "$HAS_VERCEL" == true ]]; then
-          ok "Keeping existing Vercel token"
+          # Keep token, update project name + domain only
+          ask_project_and_domain
+        else
+          dim "  Skipping Vercel — you can drag your output/ folder to netlify.com/drop."
+        fi
+        ;;
+      3|*)
+        if [[ "$HAS_VERCEL" == true ]]; then
+          ok "Keeping existing Vercel config"
         else
           dim "  Skipping Vercel — you can drag your output/ folder to netlify.com/drop."
         fi
@@ -371,12 +434,13 @@ if ! $CHECK_ONLY; then
     FINAL_GEMINI="${NEW_GEMINI:-$GEMINI_KEY}"
     FINAL_OPENAI="${NEW_OPENAI:-$OPENAI_KEY}"
     FINAL_VERCEL="${NEW_VERCEL:-$VERCEL_TOKEN}"
-    FINAL_PROJECT="${NEW_PROJECT:-fora-pages}"
-    FINAL_MODEL="${NEW_MODEL}"
+    FINAL_PROJECT="${NEW_PROJECT:-$SUGGESTED_PROJECT}"
+    FINAL_DOMAIN="${NEW_DOMAIN:-$DEPLOY_DOMAIN}"
+    FINAL_MODEL="${NEW_MODEL:-$AI_MODEL_SET}"
 
     {
       echo "# FORA — Environment Variables"
-      echo "# Generated by setup.sh — re-run setup.sh to update keys or model"
+      echo "# Generated by setup.sh — re-run setup.sh to update keys, model, or domain"
       echo ""
       echo "# AI provider — add ONE key (FORA auto-detects which to use)"
       echo "# Options 3 + 4 only — not required for options 1 or 2"
@@ -384,7 +448,7 @@ if ! $CHECK_ONLY; then
       echo "GEMINI_API_KEY=${FINAL_GEMINI}"
       echo "OPENAI_API_KEY=${FINAL_OPENAI}"
       echo ""
-      echo "# Model to use for codegen — set during setup, change anytime"
+      echo "# Model to use for codegen — set during setup, change anytime by re-running setup.sh"
       echo "AI_MODEL=${FINAL_MODEL}"
       echo ""
       echo "# Optional — force a specific provider if you have multiple keys"
@@ -392,8 +456,10 @@ if ! $CHECK_ONLY; then
       echo ""
       echo "# Vercel — options 2 + 4 only"
       echo "VERCEL_TOKEN=${FINAL_VERCEL}"
+      echo "# Your personal project name — your deploy URL is: https://[name].vercel.app/[company]"
       echo "VERCEL_PROJECT_NAME=${FINAL_PROJECT}"
-      echo "DEPLOY_DOMAIN="
+      echo "# Optional custom domain — e.g. apply.yourname.com → https://apply.yourname.com/[company]"
+      echo "DEPLOY_DOMAIN=${FINAL_DOMAIN}"
       echo ""
       echo "# PostHog — optional, V1 feature"
       echo "POSTHOG_API_KEY="
@@ -407,6 +473,8 @@ if ! $CHECK_ONLY; then
     GEMINI_KEY="$FINAL_GEMINI"
     OPENAI_KEY="$FINAL_OPENAI"
     VERCEL_TOKEN="$FINAL_VERCEL"
+    VERCEL_PROJECT="$FINAL_PROJECT"
+    DEPLOY_DOMAIN="$FINAL_DOMAIN"
     HAS_AI=false
     HAS_VERCEL=false
     AI_PROVIDER_NAME=""
@@ -431,21 +499,30 @@ if [[ "$EXIT_CODE" -eq 0 ]]; then
   # Show which options are unlocked
   echo -e "  ${BOLD}Available options:${RESET}"
   echo -e "  1 ${GREEN}✓${RESET}  Manual codegen + Manual deploy  ${DIM}(always free)${RESET}"
-  [[ "$HAS_VERCEL" == true ]] \
-    && echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy via Vercel" \
-    || echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy  (add Vercel token — vercel.com/account/tokens)${RESET}"
+  if [[ "$HAS_VERCEL" == true ]]; then
+    if [[ -n "$DEPLOY_DOMAIN" ]]; then
+      DEPLOY_URL_PREVIEW="https://${DEPLOY_DOMAIN}/[company]"
+    else
+      DEPLOY_URL_PREVIEW="https://${VERCEL_PROJECT}.vercel.app/[company]"
+    fi
+    echo -e "  2 ${GREEN}✓${RESET}  Manual codegen + Auto deploy  ${DIM}→ ${DEPLOY_URL_PREVIEW}${RESET}"
+  else
+    echo -e "  2 ${DIM}✗  Manual codegen + Auto deploy  (add Vercel token — vercel.com/account/tokens)${RESET}"
+  fi
   [[ "$HAS_AI" == true ]] \
     && echo -e "  3 ${GREEN}✓${RESET}  Auto codegen via ${AI_PROVIDER_NAME} + Manual deploy" \
     || echo -e "  3 ${DIM}✗  Auto codegen + Manual deploy  (add an AI key)${RESET}"
-  [[ "$HAS_AI" == true && "$HAS_VERCEL" == true ]] \
-    && echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via ${AI_PROVIDER_NAME} + Auto deploy via Vercel" \
-    || echo -e "  4 ${DIM}✗  Auto codegen + Auto deploy    (add AI key + Vercel token)${RESET}"
+  if [[ "$HAS_AI" == true && "$HAS_VERCEL" == true ]]; then
+    echo -e "  4 ${GREEN}✓${RESET}  Auto codegen via ${AI_PROVIDER_NAME} + Auto deploy  ${DIM}→ ${DEPLOY_URL_PREVIEW}${RESET}"
+  else
+    echo -e "  4 ${DIM}✗  Auto codegen + Auto deploy    (add AI key + Vercel token)${RESET}"
+  fi
 
   echo ""
   echo -e "  ${BOLD}Start your first application:${RESET}"
   echo -e "  ${BOLD}./run.sh${RESET}"
   echo ""
-  dim "  Re-run ./setup.sh anytime to check your setup or update keys."
+  dim "  Re-run ./setup.sh anytime to update keys, model, or domain."
 else
   echo -e "${YELLOW}${BOLD}Setup incomplete.${RESET} Fix the issues above and run ./setup.sh again."
 fi

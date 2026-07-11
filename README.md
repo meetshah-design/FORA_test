@@ -37,7 +37,7 @@ In your first afternoon with FORA:
 ✓ Publish it live (optional)
 
 Result: a URL you can send in a cold message
-→ https://fora-pages.vercel.app/company-role
+→ https://meet-shah.vercel.app/company-role   (your name, your URL)
 ```
 
 ---
