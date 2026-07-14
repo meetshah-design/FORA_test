@@ -241,152 +241,201 @@ if ! $CHECK_ONLY; then
     echo -e "${BOLD}Key setup${RESET}"
     echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
 
-    # ── Question 1: AI key ─────────────────────────────────────────────────
-    echo ""
-    if [[ "$HAS_AI" == true ]]; then
-      echo -e "  AI key already set ${DIM}(${AI_PROVIDER_NAME})${RESET} — replace it or skip to keep it."
-    else
-      echo "  Do you have an AI API key? (used for auto codegen — options 3 + 4)"
-      echo -e "  ${DIM}If not, you can always generate in AI chat for free — skip for now.${RESET}"
-    fi
-    echo ""
-    echo "  1) Anthropic Claude  — console.anthropic.com/settings/keys"
-    echo "  2) Google Gemini     — aistudio.google.com/app/apikey"
-    echo "  3) OpenAI            — platform.openai.com/api-keys"
-    [[ "$HAS_AI" == true ]] && echo "  4) Keep existing key" || echo "  4) Skip — no AI key"
-    echo ""
-    echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-    read -r AI_CHOICE
+    # ── Question 1: AI ────────────────────────────────────────────────────────
+
+    # Helper: ask for model given a provider name
+    ask_model_for_provider() {
+      local provider="$1"
+      echo ""
+      echo -e "  Which model?"
+      case "$provider" in
+        anthropic)
+          echo -e "  1) claude-opus-4-5     ${DIM}(default — best quality)${RESET}"
+          echo -e "  2) claude-sonnet-4-5   ${DIM}(faster, still strong)${RESET}"
+          echo -e "  3) claude-haiku-3-5    ${DIM}(fastest, lowest cost)${RESET}"
+          echo -e "  4) claude-sonnet-4     ${DIM}(latest sonnet)${RESET}"
+          echo -e "  5) Custom — type a model name"
+          read -r MC
+          case "$MC" in
+            1|"") NEW_MODEL="claude-opus-4-5" ;;
+            2)    NEW_MODEL="claude-sonnet-4-5" ;;
+            3)    NEW_MODEL="claude-haiku-3-5" ;;
+            4)    NEW_MODEL="claude-sonnet-4" ;;
+            5)    echo -e "  Model name:"; read -r NEW_MODEL ;;
+            *)    NEW_MODEL="$MC" ;;
+          esac
+          ;;
+        gemini)
+          echo -e "  1) gemini-2.0-flash    ${DIM}(default — fast, widely available)${RESET}"
+          echo -e "  2) gemini-2.5-pro      ${DIM}(slower, highest quality)${RESET}"
+          echo -e "  3) gemini-2.5-flash    ${DIM}(fast + strong — check availability)${RESET}"
+          echo -e "  4) gemini-1.5-pro      ${DIM}(stable, broad availability)${RESET}"
+          echo -e "  5) Custom — type a model name"
+          read -r MC
+          case "$MC" in
+            1|"") NEW_MODEL="gemini-2.0-flash" ;;
+            2)    NEW_MODEL="gemini-2.5-pro" ;;
+            3)    NEW_MODEL="gemini-2.5-flash" ;;
+            4)    NEW_MODEL="gemini-1.5-pro" ;;
+            5)    echo -e "  Model name:"; read -r NEW_MODEL ;;
+            *)    NEW_MODEL="$MC" ;;
+          esac
+          ;;
+        openai)
+          echo -e "  1) gpt-4o              ${DIM}(default — best quality)${RESET}"
+          echo -e "  2) gpt-4o-mini         ${DIM}(faster, lower cost)${RESET}"
+          echo -e "  3) gpt-4-turbo         ${DIM}(strong, slightly older)${RESET}"
+          echo -e "  4) o1-mini             ${DIM}(reasoning model)${RESET}"
+          echo -e "  5) Custom — type a model name"
+          read -r MC
+          case "$MC" in
+            1|"") NEW_MODEL="gpt-4o" ;;
+            2)    NEW_MODEL="gpt-4o-mini" ;;
+            3)    NEW_MODEL="gpt-4-turbo" ;;
+            4)    NEW_MODEL="o1-mini" ;;
+            5)    echo -e "  Model name:"; read -r NEW_MODEL ;;
+            *)    NEW_MODEL="$MC" ;;
+          esac
+          ;;
+      esac
+      ok "Model: ${NEW_MODEL}"
+    }
+
+    # Helper: ask for key then model for a given provider
+    ask_key_for_provider() {
+      local provider="$1"
+      case "$provider" in
+        anthropic)
+          echo ""
+          echo -e "  Paste your Anthropic key:"
+          read -r NEW_ANTHROPIC
+          if [[ -n "$NEW_ANTHROPIC" ]]; then
+            ok "Anthropic key received"
+            NEW_GEMINI=""; NEW_OPENAI=""
+            GEMINI_KEY=""; OPENAI_KEY=""
+            ask_model_for_provider "anthropic"
+          fi
+          ;;
+        gemini)
+          echo ""
+          echo -e "  Paste your Gemini key:"
+          read -r NEW_GEMINI
+          if [[ -n "$NEW_GEMINI" ]]; then
+            ok "Gemini key received"
+            NEW_ANTHROPIC=""; NEW_OPENAI=""
+            ANTHROPIC_KEY=""; OPENAI_KEY=""
+            ask_model_for_provider "gemini"
+          fi
+          ;;
+        openai)
+          echo ""
+          echo -e "  Paste your OpenAI key:"
+          read -r NEW_OPENAI
+          if [[ -n "$NEW_OPENAI" ]]; then
+            ok "OpenAI key received"
+            NEW_ANTHROPIC=""; NEW_GEMINI=""
+            ANTHROPIC_KEY=""; GEMINI_KEY=""
+            ask_model_for_provider "openai"
+          fi
+          ;;
+      esac
+    }
+
+    # Helper: provider picker menu
+    ask_provider_choice() {
+      echo ""
+      echo "  1) Anthropic Claude  — console.anthropic.com/settings/keys"
+      echo "  2) Google Gemini     — aistudio.google.com/app/apikey"
+      echo "  3) OpenAI            — platform.openai.com/api-keys"
+      echo ""
+      echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+      read -r PROV_CHOICE
+      case "$PROV_CHOICE" in
+        1) ask_key_for_provider "anthropic" ;;
+        2) ask_key_for_provider "gemini" ;;
+        3) ask_key_for_provider "openai" ;;
+      esac
+    }
 
     NEW_ANTHROPIC=""
     NEW_GEMINI=""
     NEW_OPENAI=""
     NEW_MODEL=""
 
-    case "$AI_CHOICE" in
-      1)
-        echo ""
-        echo -e "  Paste your Anthropic key:"
-        read -r NEW_ANTHROPIC
-        if [[ -n "$NEW_ANTHROPIC" ]]; then
-          ok "Anthropic key received"
-          NEW_GEMINI=""; NEW_OPENAI=""
-          GEMINI_KEY=""; OPENAI_KEY=""
-          echo ""
-          echo -e "  Which model? Press Enter for the default."
-          echo -e "  ${DIM}1) claude-opus-4-5     (default — best quality)${RESET}"
-          echo -e "  ${DIM}2) claude-sonnet-4-5   (faster, still strong)${RESET}"
-          echo -e "  ${DIM}3) Custom — type a model name${RESET}"
-          read -r MODEL_CHOICE
-          case "$MODEL_CHOICE" in
-            1|"") NEW_MODEL="claude-opus-4-5" ;;
-            2)    NEW_MODEL="claude-sonnet-4-5" ;;
-            3)    echo -e "  Model name:"; read -r NEW_MODEL ;;
-            *)    NEW_MODEL="$MODEL_CHOICE" ;;
+    echo ""
+    if [[ "$HAS_AI" == true ]]; then
+      CURRENT_MODEL_DISPLAY="${AI_MODEL_SET:-default}"
+      echo -e "  AI key set — ${BOLD}${AI_PROVIDER_NAME}${RESET} · model: ${DIM}${CURRENT_MODEL_DISPLAY}${RESET}"
+      echo ""
+      echo "  What do you want to change?"
+      echo "  1) Switch provider   — change to a different AI provider"
+      echo "  2) Replace key       — new key, same provider (${AI_PROVIDER_NAME})"
+      echo "  3) Change model only — keep key, pick a different model"
+      echo "  4) Keep as-is"
+      echo ""
+      echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+      read -r AI_CHOICE
+      case "$AI_CHOICE" in
+        1) ask_provider_choice ;;
+        2)
+          case "$(echo "$AI_PROVIDER_NAME" | tr '[:upper:]' '[:lower:]')" in
+            anthropic) ask_key_for_provider "anthropic" ;;
+            gemini)    ask_key_for_provider "gemini" ;;
+            openai)    ask_key_for_provider "openai" ;;
           esac
-          ok "Model: ${NEW_MODEL}"
-        fi
-        ;;
-      2)
-        echo ""
-        echo -e "  Paste your Gemini key:"
-        read -r NEW_GEMINI
-        if [[ -n "$NEW_GEMINI" ]]; then
-          ok "Gemini key received"
-          NEW_ANTHROPIC=""; NEW_OPENAI=""
-          ANTHROPIC_KEY=""; OPENAI_KEY=""
-          echo ""
-          echo -e "  Which model? Press Enter for the default."
-          echo -e "  ${DIM}1) gemini-2.0-flash    (recommended — fast, widely available)${RESET}"
-          echo -e "  ${DIM}2) gemini-2.5-pro      (slower, highest quality)${RESET}"
-          echo -e "  ${DIM}3) gemini-2.5-flash    (fast + strong — check availability for your account)${RESET}"
-          echo -e "  ${DIM}4) Custom — type a model name${RESET}"
-          read -r MODEL_CHOICE
-          case "$MODEL_CHOICE" in
-            1|"") NEW_MODEL="gemini-2.0-flash" ;;
-            2)    NEW_MODEL="gemini-2.5-pro" ;;
-            3)    NEW_MODEL="gemini-2.5-flash" ;;
-            4)    echo -e "  Model name:"; read -r NEW_MODEL ;;
-            *)    NEW_MODEL="$MODEL_CHOICE" ;;
+          ;;
+        3)
+          case "$(echo "$AI_PROVIDER_NAME" | tr '[:upper:]' '[:lower:]')" in
+            anthropic) ask_model_for_provider "anthropic" ;;
+            gemini)    ask_model_for_provider "gemini" ;;
+            openai)    ask_model_for_provider "openai" ;;
           esac
-          ok "Model: ${NEW_MODEL}"
-        fi
-        ;;
-      3)
-        echo ""
-        echo -e "  Paste your OpenAI key:"
-        read -r NEW_OPENAI
-        if [[ -n "$NEW_OPENAI" ]]; then
-          ok "OpenAI key received"
-          NEW_ANTHROPIC=""; NEW_GEMINI=""
-          ANTHROPIC_KEY=""; GEMINI_KEY=""
-          echo ""
-          echo -e "  Which model? Press Enter for the default."
-          echo -e "  ${DIM}1) gpt-4o              (default — best quality)${RESET}"
-          echo -e "  ${DIM}2) gpt-4o-mini          (faster, lower cost)${RESET}"
-          echo -e "  ${DIM}3) Custom — type a model name${RESET}"
-          read -r MODEL_CHOICE
-          case "$MODEL_CHOICE" in
-            1|"") NEW_MODEL="gpt-4o" ;;
-            2)    NEW_MODEL="gpt-4o-mini" ;;
-            3)    echo -e "  Model name:"; read -r NEW_MODEL ;;
-            *)    NEW_MODEL="$MODEL_CHOICE" ;;
-          esac
-          ok "Model: ${NEW_MODEL}"
-        fi
-        ;;
-      4|*)
-        if [[ "$HAS_AI" == true ]]; then
-          ok "Keeping existing ${AI_PROVIDER_NAME} key"
-        else
-          dim "  Skipping AI key — options 1 and 2 will always be available."
-        fi
-        ;;
-    esac
+          ;;
+        4|*)
+          ok "Keeping existing ${AI_PROVIDER_NAME} key and model"
+          ;;
+      esac
+    else
+      echo "  No AI key set — options 3 + 4 unavailable without one."
+      echo -e "  ${DIM}You can always generate in AI chat for free (options 1 + 2).${RESET}"
+      echo ""
+      echo "  1) Add an AI key"
+      echo "  2) Skip for now"
+      echo ""
+      echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+      read -r AI_CHOICE
+      case "$AI_CHOICE" in
+        1) ask_provider_choice ;;
+        *) dim "  Skipping — options 1 and 2 will always be available." ;;
+      esac
+    fi
 
     # ── Question 2: Vercel ─────────────────────────────────────────────────
-    echo ""
-    if [[ "$HAS_VERCEL" == true ]]; then
-      CURRENT_PROJECT="${VERCEL_PROJECT:-$SUGGESTED_PROJECT}"
-      if [[ -n "$DEPLOY_DOMAIN" ]]; then
-        echo -e "  Vercel already set — deploy URL: ${DIM}https://${DEPLOY_DOMAIN}/[company]${RESET}"
-      else
-        echo -e "  Vercel already set — deploy URL: ${DIM}https://${CURRENT_PROJECT}.vercel.app/[company]${RESET}"
-      fi
-    else
-      echo "  Do you have a Vercel token? (used for auto deploy — options 2 + 4)"
-      echo -e "  ${DIM}Gets you a permanent live URL with one command. Free tier works.${RESET}"
-      echo -e "  ${DIM}Get one at: vercel.com/account/tokens${RESET}"
-    fi
-    echo ""
-    echo "  1) Paste a new token"
-    if [[ "$HAS_VERCEL" == true ]]; then
-      echo "  2) Update project name / custom domain  ${DIM}(keep existing token)${RESET}"
-      echo "  3) Keep everything as-is"
-    else
-      echo "  2) Skip — I'll deploy manually"
-    fi
-    echo ""
-    echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
-    read -r VERCEL_CHOICE
 
     NEW_VERCEL=""
     NEW_PROJECT="${VERCEL_PROJECT:-$SUGGESTED_PROJECT}"
     NEW_DOMAIN="${DEPLOY_DOMAIN}"
 
-    # Helper: ask project name + domain questions
-    ask_project_and_domain() {
+    # Helper: ask project name only
+    ask_project_name() {
       echo ""
       echo -e "  What should your Vercel project be called?"
       echo -e "  ${DIM}This becomes your URL: [project-name].vercel.app/[company]${RESET}"
-      echo -e "  ${DIM}Press Enter to use: ${NEW_PROJECT}${RESET}"
+      if [[ -n "$VERCEL_PROJECT" ]]; then
+        echo -e "  ${DIM}Current: ${VERCEL_PROJECT} — press Enter to keep, or type a new one${RESET}"
+      else
+        echo -e "  ${DIM}Press Enter to use: ${NEW_PROJECT}${RESET}"
+      fi
       read -r INPUT_PROJECT
       [[ -n "$INPUT_PROJECT" ]] && NEW_PROJECT="$INPUT_PROJECT"
-      ok "Project: ${NEW_PROJECT} → https://${NEW_PROJECT}.vercel.app/[company]"
+      ok "Project name: ${NEW_PROJECT} → https://${NEW_PROJECT}.vercel.app/[company]"
+    }
 
+    # Helper: ask custom domain only
+    ask_custom_domain() {
       echo ""
       echo -e "  Custom domain? (e.g. apply.yourname.com)"
-      echo -e "  ${DIM}If yes, pages deploy to https://[domain]/[company] instead.${RESET}"
+      echo -e "  ${DIM}Pages deploy to https://[domain]/[company] instead of vercel.app${RESET}"
       if [[ -n "$NEW_DOMAIN" ]]; then
         echo -e "  ${DIM}Current: ${NEW_DOMAIN} — press Enter to keep, or type a new one${RESET}"
       else
@@ -396,38 +445,70 @@ if ! $CHECK_ONLY; then
       if [[ -n "$INPUT_DOMAIN" ]]; then
         NEW_DOMAIN="$INPUT_DOMAIN"
         ok "Custom domain: https://${NEW_DOMAIN}/[company]"
-        dim "  Remember to add this domain in Vercel dashboard → your project → Settings → Domains"
+        dim "  Add this domain in Vercel dashboard → your project → Settings → Domains"
       elif [[ -n "$NEW_DOMAIN" ]]; then
         ok "Keeping domain: https://${NEW_DOMAIN}/[company]"
+      else
+        dim "  No custom domain — using ${NEW_PROJECT}.vercel.app"
       fi
     }
 
-    case "$VERCEL_CHOICE" in
-      1)
-        echo ""
-        echo -e "  Paste your Vercel token:"
-        read -r NEW_VERCEL
-        if [[ -n "$NEW_VERCEL" ]]; then
-          ok "Vercel token received"
-          ask_project_and_domain
-        fi
-        ;;
-      2)
-        if [[ "$HAS_VERCEL" == true ]]; then
-          # Keep token, update project name + domain only
-          ask_project_and_domain
-        else
-          dim "  Skipping Vercel — you can drag your output/ folder to netlify.com/drop."
-        fi
-        ;;
-      3|*)
-        if [[ "$HAS_VERCEL" == true ]]; then
-          ok "Keeping existing Vercel config"
-        else
-          dim "  Skipping Vercel — you can drag your output/ folder to netlify.com/drop."
-        fi
-        ;;
-    esac
+    echo ""
+    if [[ "$HAS_VERCEL" == true ]]; then
+      CURRENT_PROJECT="${VERCEL_PROJECT:-$SUGGESTED_PROJECT}"
+      if [[ -n "$DEPLOY_DOMAIN" ]]; then
+        echo -e "  Vercel set — deploy URL: ${DIM}https://${DEPLOY_DOMAIN}/[company]${RESET}"
+      else
+        echo -e "  Vercel set — deploy URL: ${DIM}https://${CURRENT_PROJECT}.vercel.app/[company]${RESET}"
+      fi
+      echo ""
+      echo "  What do you want to change?"
+      echo "  1) Replace token      — paste a new Vercel token"
+      echo "  2) Change project name — update your URL slug"
+      echo "  3) Change custom domain — add, update, or remove"
+      echo "  4) Keep as-is"
+      echo ""
+      echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+      read -r VERCEL_CHOICE
+      case "$VERCEL_CHOICE" in
+        1)
+          echo ""
+          echo -e "  Paste your new Vercel token:"
+          read -r NEW_VERCEL
+          if [[ -n "$NEW_VERCEL" ]]; then
+            ok "Vercel token received"
+            ask_project_name
+            ask_custom_domain
+          fi
+          ;;
+        2) ask_project_name ;;
+        3) ask_custom_domain ;;
+        4|*) ok "Keeping existing Vercel config" ;;
+      esac
+    else
+      echo "  No Vercel token — auto deploy unavailable (options 2 + 4)."
+      echo -e "  ${DIM}Gets you a permanent live URL in one command. Free tier works.${RESET}"
+      echo -e "  ${DIM}Get a token at: vercel.com/account/tokens${RESET}"
+      echo ""
+      echo "  1) Add Vercel token"
+      echo "  2) Skip — I'll deploy manually"
+      echo ""
+      echo -e "  ${DIM}(Ctrl+C to exit)${RESET}"
+      read -r VERCEL_CHOICE
+      case "$VERCEL_CHOICE" in
+        1)
+          echo ""
+          echo -e "  Paste your Vercel token:"
+          read -r NEW_VERCEL
+          if [[ -n "$NEW_VERCEL" ]]; then
+            ok "Vercel token received"
+            ask_project_name
+            ask_custom_domain
+          fi
+          ;;
+        *) dim "  Skipping — you can drag your output/ folder to netlify.com/drop anytime." ;;
+      esac
+    fi
 
     # ── Write .env ─────────────────────────────────────────────────────────
     FINAL_ANTHROPIC="${NEW_ANTHROPIC:-$ANTHROPIC_KEY}"
