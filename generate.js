@@ -238,8 +238,25 @@ function planner(brief, templateJson) {
 // ════════════════════════════════════════════════════════════════════════════
 // MODULE 2 — KNOWLEDGE LOADER
 // Loads profile.json. Merges relevant fields into the section brief slice.
+// If the brief is inside an examples/ subfolder (e.g. examples/alex-rivera/brief.json),
+// looks for a co-located profile.json in the same folder first — falls back to profile/profile.json.
 // ════════════════════════════════════════════════════════════════════════════
-function knowledgeLoader() {
+function knowledgeLoader(briefPath) {
+  // Check for co-located profile (examples/*/profile.json)
+  if (briefPath) {
+    const briefDir = path.dirname(path.resolve(briefPath));
+    const colocated = path.join(briefDir, 'profile.json');
+    if (fs.existsSync(colocated)) {
+      try {
+        const profile = JSON.parse(fs.readFileSync(colocated, 'utf8'));
+        ok(`Profile loaded from example: ${path.relative(__dirname, colocated)}`);
+        return profile;
+      } catch (e) {
+        fail(`Could not parse co-located profile.json: ${e.message}`);
+      }
+    }
+  }
+
   const profilePath = path.join(__dirname, 'profile', 'profile.json');
   if (!fs.existsSync(profilePath)) {
     fail(`profile.json not found at profile/profile.json
@@ -745,7 +762,7 @@ Regenerate before deploying:
   }
 
   // ── Module 2: Knowledge Loader ───────────────────────────────────────────
-  const profile = knowledgeLoader();
+  const profile = knowledgeLoader(briefArg);
   ok(`Profile loaded: ${profile.identity?.name}`);
 
   // ── Module 3: DS Loader ──────────────────────────────────────────────────
