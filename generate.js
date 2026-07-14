@@ -567,12 +567,9 @@ async function publisher(slug, htmlContent) {
   });
   deployedSlugs.add(slug);
 
-  // Add vercel.json as a file — routes must be declared here, not in the API payload.
-  // This rewrites /<slug> and /<slug>/ to /<slug>/index.html for every deployed page.
-  const vercelRoutes = [...deployedSlugs].map(s => ({
-    src: `^/${s}/?$`, dest: `/${s}/index.html`,
-  }));
-  const vercelJson = JSON.stringify({ routes: vercelRoutes }, null, 2);
+  // Add vercel.json — cleanUrls serves /slug/index.html at /slug automatically.
+  // trailingSlash: false keeps URLs clean (no redirect loop).
+  const vercelJson = JSON.stringify({ cleanUrls: true, trailingSlash: false }, null, 2);
   files.push({
     file:     'vercel.json',
     data:     Buffer.from(vercelJson).toString('base64'),
@@ -598,16 +595,6 @@ async function publisher(slug, htmlContent) {
     body: deployPayload,
   });
 
-  // Temporary debug — log full Vercel response
-  try {
-    const dbg = JSON.parse(res.body);
-    dim(`  Vercel response status: ${res.status}`);
-    dim(`  deployment.url: ${dbg.url}`);
-    dim(`  deployment.readyState: ${dbg.readyState}`);
-    dim(`  files deployed: ${(dbg.fileTree || files).length}`);
-    if (dbg.error) dim(`  error: ${JSON.stringify(dbg.error)}`);
-  } catch {}
-
   if (res.status !== 200 && res.status !== 201) {
     let errMsg = `Vercel API error ${res.status}`;
     try {
@@ -618,13 +605,17 @@ async function publisher(slug, htmlContent) {
   }
 
   const deployment = JSON.parse(res.body);
-  // deployment.url is always the per-deploy preview hash URL — never show it.
-  // Prefer: custom domain → projectName.vercel.app → preview URL (last resort only).
-  const customUrl   = domain ? `https://${domain}/${slug}` : null;
-  const cleanUrl    = `https://${projectName}.vercel.app/${slug}`;
-  const previewUrl  = deployment.url ? `https://${deployment.url}/${slug}` : null;
+  // Prefer: custom domain → stable alias from Vercel (not the hash preview URL) → fallback
+  const customUrl = domain ? `https://${domain}/${slug}` : null;
+  // aliases[] contains the stable project URL (e.g. meetshah-meetshahdesign.vercel.app)
+  // Pick the shortest alias that ends in .vercel.app — that's the stable one
+  const stableAlias = (deployment.aliases || [])
+    .filter(a => a.endsWith('.vercel.app'))
+    .sort((a, b) => a.length - b.length)[0];
+  const stableUrl = stableAlias ? `https://${stableAlias}/${slug}` : null;
+  const fallbackUrl = `https://${projectName}.vercel.app/${slug}`;
 
-  return customUrl || cleanUrl || previewUrl;
+  return customUrl || stableUrl || fallbackUrl;
 }
 
 // ════════════════════════════════════════════════════════════════════════════

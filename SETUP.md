@@ -427,6 +427,11 @@ Returns a live URL: `https://[your-project-name].vercel.app/[company]` (or your 
 
 Your Vercel project must exist before the first deploy — create it once at [vercel.com/new](https://vercel.com/new) (empty project, no framework, no git connection needed). The project name must match `VERCEL_PROJECT_NAME` in your `.env`.
 
+**After your first deploy — make pages public:**
+By default Vercel enables Deployment Protection, which requires login to view any page. Turn it off once:
+Vercel dashboard → your project → Settings → Deployment Protection → set to **None** → Save.
+Without this step, anyone you send the URL to will hit an auth gate.
+
 ---
 
 **Manual deploy via any static host (options 1 + 3):**
