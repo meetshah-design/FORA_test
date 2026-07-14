@@ -81,19 +81,7 @@ fi
 # CHECK 2 — Dependencies
 # ════════════════════════════════════════════════════════════════════════════
 step "2/5" "Dependencies"
-
-if [[ -d "node_modules" ]]; then
-  ok "node_modules present"
-else
-  if $CHECK_ONLY; then
-    fail "node_modules not found — run: npm install"
-    EXIT_CODE=1
-  else
-    info "Running npm install..."
-    npm install
-    ok "npm install complete"
-  fi
-fi
+ok "No npm dependencies — Node built-ins only"
 
 # ════════════════════════════════════════════════════════════════════════════
 # CHECK 3 — Profile
