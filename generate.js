@@ -598,6 +598,16 @@ async function publisher(slug, htmlContent) {
     body: deployPayload,
   });
 
+  // Temporary debug — log full Vercel response
+  try {
+    const dbg = JSON.parse(res.body);
+    dim(`  Vercel response status: ${res.status}`);
+    dim(`  deployment.url: ${dbg.url}`);
+    dim(`  deployment.readyState: ${dbg.readyState}`);
+    dim(`  files deployed: ${(dbg.fileTree || files).length}`);
+    if (dbg.error) dim(`  error: ${JSON.stringify(dbg.error)}`);
+  } catch {}
+
   if (res.status !== 200 && res.status !== 201) {
     let errMsg = `Vercel API error ${res.status}`;
     try {
