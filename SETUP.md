@@ -4,6 +4,15 @@ Everything you need to go from zero to your first live application page, in one 
 
 ---
 
+## What are you trying to do?
+
+→ **First time setup** — start at [Section 2: First-time setup](#step-1--fork-and-clone-the-repo)
+→ **Run a new application** — jump to [Section 3: Run an application](#step-5--run-your-first-application)
+→ **Update profile or keys** — jump to [Section 5: Updating your setup](#maintaining-fora)
+→ **Something's broken** — jump to [Section 6: Health check](#health-check)
+
+---
+
 ## How this works
 
 Before you start, here's the mental model. Three pieces, no magic connections between them.
@@ -34,39 +43,18 @@ Before you start, here's the mental model. Three pieces, no magic connections be
 
 ---
 
-## Modes — pick yours before starting
+## Modes — quick reference
 
-FORA works in four modes. You don't need an API key to get a real output.
+| Mode | Codegen | Deploy | Keys needed |
+|------|---------|--------|-------------|
+| 1 | Manual — any AI chat | Manual — any static host | None |
+| 2 ★ | Manual — any AI chat | Auto — Vercel | Vercel token |
+| 3 | Auto — AI API | Manual — any static host | Any AI key |
+| 4 | Auto — AI API + Vercel | Auto — Vercel | AI key + Vercel token |
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  1  Manual codegen via AI chat + Manual deploy via any static host          │
-│     Free — no keys needed                                                   │
-│     Best for: first run, no keys yet                                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  2  Manual codegen via AI chat + Auto deploy via Vercel          ★          │
-│     Needs: Vercel token only                                                │
-│     Best for: permanent URL with zero AI API cost                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  3  Auto codegen via AI API + Manual deploy via any static host             │
-│     Needs: Anthropic, Gemini, or OpenAI key                                 │
-│     Best for: fast generation, deploy wherever you prefer                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  4  Auto codegen via AI API + Auto deploy via Vercel                        │
-│     Needs: any AI key + Vercel token                                        │
-│     Best for: fully automated — URL ready to send the same day              │
-└─────────────────────────────────────────────────────────────────────────────┘
+★ Mode 2 is the recommended starting point — permanent URL, zero AI API cost.
 
-★ Option 2 is the most practical starting point — permanent URL, zero AI API cost.
-  AI provider and Vercel are fully independent. You only need what your option requires.
-```
-
-**Supported AI providers for options 3 + 4:**
-- Anthropic Claude — [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
-- Google Gemini — [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
-- OpenAI — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-
-Add any one key to `.env` — FORA auto-detects the provider. If you have multiple keys set, it prioritises Anthropic → Gemini → OpenAI, or you can force a specific provider with `AI_PROVIDER=gemini` in `.env`.
+Full explanation: [README → Usage options](README.md)
 
 You choose your option **per application** when you run `./run.sh` — not once during setup. If you have no keys, option 1 is always available. As you add keys, more options unlock automatically.
 
@@ -538,7 +526,7 @@ Your personal files (`profile.json`, `briefs/`, `output/`, `.env`) are gitignore
 
 ---
 
-## Troubleshooting
+## Health check
 
 **Scripts say permission denied**
 ```bash

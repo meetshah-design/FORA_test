@@ -26,19 +26,7 @@ chmod +x setup.sh brainstorm.sh codegen.sh run.sh
 
 ---
 
-## What you'll build
-
-In your first afternoon with FORA:
-
-```
-✓ Build your private career knowledge base (profile.json)
-✓ Brainstorm one application against a real JD
-✓ Generate a personalised landing page
-✓ Publish it live (optional)
-
-Result: a URL you can send in a cold message
-→ https://meet-shah.vercel.app/company-role   (your name, your URL)
-```
+→ See [examples/alex-rivera/output/index.html](examples/alex-rivera/output/index.html) for a pre-generated example page.
 
 ---
 
@@ -130,6 +118,7 @@ FORA/
 │
 ├── generate.js                   # Main script: --run, --publish, --deploy modes
 ├── brainstorm.sh                 # Fetches JD, assembles prompt, copies to clipboard
+├── run.sh                        # End-to-end guided flow — brainstorm → generate → deploy
 ├── .env.example                  # Environment variables (all optional depending on mode)
 ├── DEVPLAN.md                    # MVP and V1 build plan
 └── SETUP.md                      # Step-by-step first-afternoon guide
@@ -159,4 +148,8 @@ Your `profile.json`, `design-system/default.md`, and all files in `briefs/` and 
 
 ## Getting started
 
-See [SETUP.md](SETUP.md) for the complete first-afternoon walkthrough.
+Ready to build your first page?
+
+→ `git clone https://github.com/meetshahco/FORA.git && ./setup.sh`
+
+Full walkthrough: [SETUP.md](SETUP.md)

@@ -25,6 +25,20 @@ Your output is a **single, complete, self-contained HTML file** — ready to ope
 6. Respect tone_notes from the brief exactly.
 7. Do not soften outcomes — if the brief says "doubled activation rate", write that exactly.
 
+11. If a slot value is null, an empty string, or explicitly false:
+    omit the element that would have contained it entirely.
+    Do not render empty tags, empty links, or placeholder text.
+
+12. If a required brief field is missing or undefined:
+    leave that slot visually absent but do not fabricate content.
+    For text slots: render an empty string.
+    For link slots: omit the element entirely.
+    Never generate placeholder text like "Coming soon", "TBD", or "[role]".
+
+13. Do not add decorative elements, dividers, icons, illustrations,
+    or visual flourishes not specified in the section template or brief.
+    The design system is intentionally minimal. Restraint is the correct output.
+
 ---
 
 ## PAGE STRUCTURE
@@ -53,7 +67,7 @@ Assemble sections in this order:
 
 **act3_bring:** Three columns (day_15, day_30, day_90) inside `.fora-day-grid`. `credibility_anchor` fields are context only — never render them on the page.
 
-**direct_cta:** Dark section — background `var(--color-ink)`, all text white. CTA button: white text, mono font, no fill, 1px white border. Cold message renders as italic quote in a subdued block.
+**direct_cta:** Dark section — background `var(--color-ink)`, all text white. CTA button: white text, mono font, no fill (transparent background), 1px white border. On hover: rgba(255,255,255,0.1) background. Cold message renders as italic quote in a subdued block.
 
 **footer:** Omit any link where the URL is null.
 

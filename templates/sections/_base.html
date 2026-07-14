@@ -8,9 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<!-- DS token overrides (injected by generate.js from design-system/default.md) -->
-<!-- {{ds_tokens}} -->
-
 <!-- Base reset + global styles -->
 <style>
 *, *::before, *::after {
@@ -24,6 +21,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -297,6 +296,11 @@ img {
   padding: var(--space-7) 40px;
 }
 
+/* Anchor tags inside CTA must be white — overrides global color: inherit */
+.fora-cta a {
+  color: #FFFFFF;
+}
+
 .fora-cta__inner {
   max-width: 720px;
   margin: 0 auto;
@@ -470,3 +474,6 @@ img {
   }
 }
 </style>
+
+<!-- DS token overrides — injected here so they win the cascade over base defaults above -->
+<!-- {{ds_tokens}} -->

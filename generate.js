@@ -856,13 +856,17 @@ Regenerate before deploying:
         slug:         plan.slug,
         url:          liveUrl,
         published_at: new Date().toISOString(),
-        confidence:   brief._meta.confidence_score || null,
-        template:     brief._meta.template_id,
-        mode:         '3-auto',
-        prompt_versions: {
-          brainstorm: brief._meta.schema_version || null,
-          codegen:    'codegen-v1',
-        },
+        prompt_versions: { codegen: 'codegen-v1' },
+        page_opens: 0,
+        time_on_page_seconds: null,
+        first_response_days: null,
+        manual_edits_made: false,
+        stories_used: [],
+        story_performance: {},
+        outcome: null,
+        interview: false,
+        response_received: false,
+        notes: '',
       });
       fs.mkdirSync(path.dirname(appsPath), { recursive: true });
       fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');
@@ -881,7 +885,6 @@ Regenerate before deploying:
     const absPath = path.resolve(outputFile);
     console.log(`${BOLD}Preview:${RESET}`);
     console.log(`  file://${absPath}`);
-    console.log(`  (paste into any browser, or: open output/${plan.slug}/index.html on mac)`);
     console.log('');
     console.log(`When ready to go live:`);
     console.log(`  ${BOLD}node generate.js --publish ${briefArg}${RESET}`);
