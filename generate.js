@@ -567,10 +567,17 @@ async function publisher(slug, htmlContent) {
   });
   deployedSlugs.add(slug);
 
-  // Build routes so /<slug> and /<slug>/ both resolve to /<slug>/index.html
-  const routes = [...deployedSlugs].map(s => ({
-    src: `/${s}/?`, dest: `/${s}/index.html`,
+  // Add vercel.json as a file — routes must be declared here, not in the API payload.
+  // This rewrites /<slug> and /<slug>/ to /<slug>/index.html for every deployed page.
+  const vercelRoutes = [...deployedSlugs].map(s => ({
+    src: `^/${s}/?$`, dest: `/${s}/index.html`,
   }));
+  const vercelJson = JSON.stringify({ routes: vercelRoutes }, null, 2);
+  files.push({
+    file:     'vercel.json',
+    data:     Buffer.from(vercelJson).toString('base64'),
+    encoding: 'base64',
+  });
 
   const deployPayload = JSON.stringify({
     name:   projectName,
@@ -580,7 +587,6 @@ async function publisher(slug, htmlContent) {
       framework: null,
       outputDirectory: '.',
     },
-    routes,
   });
 
   const res = await fetchUrl('https://api.vercel.com/v13/deployments', {
