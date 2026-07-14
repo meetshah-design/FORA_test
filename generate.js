@@ -572,10 +572,13 @@ async function publisher(slug, htmlContent) {
   }
 
   const deployment = JSON.parse(res.body);
-  const deployUrl  = deployment.url ? `https://${deployment.url}/${slug}` : null;
-  const customUrl  = domain ? `https://${domain}/${slug}` : null;
+  // deployment.url is always the per-deploy preview hash URL — never show it.
+  // Prefer: custom domain → projectName.vercel.app → preview URL (last resort only).
+  const customUrl   = domain ? `https://${domain}/${slug}` : null;
+  const cleanUrl    = `https://${projectName}.vercel.app/${slug}`;
+  const previewUrl  = deployment.url ? `https://${deployment.url}/${slug}` : null;
 
-  return customUrl || deployUrl || `https://${projectName}.vercel.app/${slug}`;
+  return customUrl || cleanUrl || previewUrl;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
