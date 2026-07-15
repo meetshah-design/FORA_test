@@ -559,6 +559,7 @@ async function publisher(slug, htmlContent) {
   const token       = process.env.VERCEL_TOKEN;
   const projectName = process.env.VERCEL_PROJECT_NAME || 'fora-pages';
   const domain      = process.env.DEPLOY_DOMAIN;
+  const vercelUrl   = process.env.VERCEL_URL ? process.env.VERCEL_URL.replace(/\/$/, '') : null;
 
   if (!token) fail('VERCEL_TOKEN is not set. Add it to your .env file.');
 
@@ -635,17 +636,51 @@ async function publisher(slug, htmlContent) {
   }
 
   const deployment = JSON.parse(res.body);
-  // Prefer: custom domain → stable alias from Vercel (not the hash preview URL) → fallback
-  const customUrl = domain ? `https://${domain}/${slug}` : null;
-  // aliases[] contains the stable project URL (e.g. meetshah-meetshahdesign.vercel.app)
-  // Pick the shortest alias that ends in .vercel.app — that's the stable one
+  // Priority: custom domain → VERCEL_URL (user-set stable alias) → aliases from API → project name fallback
+  const customUrl    = domain    ? `https://${domain}/${slug}` : null;
+  const vercelUrlFmt = vercelUrl ? `${vercelUrl}/${slug}` : null;
+  // aliases[] from the deploy response — often empty immediately (Vercel attaches async)
   const stableAlias = (deployment.aliases || [])
     .filter(a => a.endsWith('.vercel.app'))
     .sort((a, b) => a.length - b.length)[0];
-  const stableUrl = stableAlias ? `https://${stableAlias}/${slug}` : null;
-  const fallbackUrl = `https://${projectName}.vercel.app/${slug}`;
+  const stableUrl    = stableAlias ? `https://${stableAlias}/${slug}` : null;
+  const fallbackUrl  = `https://${projectName}.vercel.app/${slug}`;
 
-  return customUrl || stableUrl || fallbackUrl;
+  return customUrl || vercelUrlFmt || stableUrl || fallbackUrl;
+}
+
+// ── Print end-of-run summary after a successful deploy ────────────────────
+function printDeploySummary(liveUrl, localHtmlPath, brief) {
+  const cold = brief && brief.cold_message;
+  const DIM  = '\x1b[2m';
+  const BOLD = '\x1b[1m';
+  const GREEN = '\x1b[0;32m';
+  const RESET = '\x1b[0m';
+
+  console.log('');
+  console.log(`${BOLD}${'─'.repeat(50)}${RESET}`);
+  console.log(`${GREEN}${BOLD}Done.${RESET}`);
+  console.log('');
+
+  if (localHtmlPath) {
+    console.log(`${BOLD}Preview your page:${RESET}`);
+    console.log(`  open "${path.resolve(localHtmlPath)}"`);
+    console.log('');
+  }
+
+  console.log(`${BOLD}Live URL:${RESET}`);
+  console.log(`  ${GREEN}${liveUrl}${RESET}`);
+  console.log('');
+
+  if (cold && (cold.hook || cold.body)) {
+    console.log(`${BOLD}Cold message:${RESET}`);
+    console.log(`${DIM}─────────────────────────────────────────${RESET}`);
+    if (cold.hook)     console.log(cold.hook);
+    if (cold.body)   { console.log(''); console.log(cold.body); }
+    if (cold.sign_off) { console.log(''); console.log(cold.sign_off); }
+    console.log(`${DIM}─────────────────────────────────────────${RESET}`);
+  }
+  console.log('');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -761,16 +796,11 @@ Regenerate before deploying:
       fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');
       ok(`Logged → applications/applications.json (${apps.length} total)`);
 
-      console.log('');
-      console.log(`${BOLD}Live URL:${RESET}`);
-      console.log(`  ${GREEN}${liveUrl}${RESET}`);
-      console.log('');
-      console.log('Copy this into your cold message and send it.');
+      printDeploySummary(liveUrl, outputFile, brief);
     } catch (e) {
       fail(`Deploy failed: ${e.message}`);
     }
 
-    console.log('');
     return;
   }
 
@@ -908,19 +938,15 @@ Regenerate before deploying:
       fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');
       ok(`Logged → applications/applications.json (${apps.length} total)`);
 
-      console.log('');
-      console.log(`${BOLD}Live URL:${RESET}`);
-      console.log(`  ${GREEN}${liveUrl}${RESET}`);
-      console.log('');
-      console.log('Copy this into your cold message and send it.');
+      printDeploySummary(liveUrl, outputFile, brief);
     } catch (e) {
       fail(`Deploy failed: ${e.message}`);
     }
   } else {
     console.log('');
     const absPath = path.resolve(outputFile);
-    console.log(`${BOLD}Preview:${RESET}`);
-    console.log(`  file://${absPath}`);
+    console.log(`${BOLD}Preview your page:${RESET}`);
+    console.log(`  open "${absPath}"`);
     console.log('');
     console.log(`When ready to go live:`);
     console.log(`  ${BOLD}node generate.js --publish ${briefArg}${RESET}`);

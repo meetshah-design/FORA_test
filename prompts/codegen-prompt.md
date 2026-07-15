@@ -79,6 +79,9 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 8. Do not soften outcomes. If the brief says "doubled activation rate" — write "doubled activation rate". Not "contributed to improvements in activation".
 9. Do not inflate. If the brief says "a B2B product (NDA)" — write exactly that. Do not add details that aren't there.
 10. Positioning line (`act1_positioning_line`): render as `<blockquote class="fora-act1__positioning">`. Do not add quotation marks — the visual style carries the weight.
+11. No em-dashes (—). Use a plain hyphen-minus (-) or rewrite the sentence to avoid the construction entirely. Em-dashes read as AI-generated and undermine the page's credibility.
+12. Write like a thoughtful human, not a language model. Avoid: "delve into", "leverage", "spearhead", "unlock", "cutting-edge", "seamlessly", "robust", "in order to", "it's worth noting", "that being said", and similar AI-sounding constructions. Plain, direct language only.
+13. Vary sentence length. Avoid starting consecutive sentences with the same word or structure.
 
 ### Section-specific rules
 
@@ -93,14 +96,32 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 
 **act2_work:**
 - Render one element per work in `works[]`, in order.
-- `section_format` determines the element type:
-  - `signal_card` → `.fora-work-card` with header (title + outcome) and body (decision)
-  - `case_study_link` → `.fora-work-card` with a "View case study" link if `url` is present
-  - `timeline_entry` → minimal: company/year on one line, decision + outcome below
-  - `featured_project` → `.fora-work-card` with full treatment: title, framing_angle as intro, decision, outcome
-- If `nda_note` is present: use it as the framing constraint. Show only what nda_note allows.
 - Respect `max_works` from section_config. If brief has 3 works but max_works is 1, render only `works[0]`.
-- Media: after each work card body, check `media` on the work entry. If non-null, render a `<figure class="fora-work-media">` block using the rules below. If null, render nothing.
+- If `nda_note` is present on a work: use it as the framing constraint. Show only what nda_note allows.
+- ALL work entries — regardless of `section_format` — use this exact HTML structure. No exceptions, no h3 tags, no fora-work-body, no <strong> labels:
+
+```html
+<div class="fora-work-card">
+  <div class="fora-work-card__header">
+    <span class="fora-work-card__company">{{title}} — {{company_name}}</span>
+    <span class="fora-work-card__badge">{{section_format}}</span>
+  </div>
+  <div class="fora-work-card__body">
+    <p class="fora-work-card__framing">{{framing_angle}}</p>
+    <span class="fora-work-card__label">THE DECISION</span>
+    <p class="fora-work-card__decision">{{decision_to_surface}}</p>
+    <span class="fora-work-card__label">THE OUTCOME</span>
+    <p class="fora-work-card__outcome">{{outcome_to_surface}}</p>
+    <!-- if media is non-null, append fora-work-media figure here -->
+    <!-- if section_format is case_study_link and url is non-null: -->
+    <!-- <a class="fora-work-card__link" href="{{url}}">View case study →</a> -->
+  </div>
+</div>
+```
+
+- `section_format` badge text: `featured_project` → "Featured", `signal_card` → "Signal", `case_study_link` → "Case Study", `timeline_entry` → "Timeline".
+- For `timeline_entry`: omit the badge and `fora-work-card__framing`. Start directly with label + decision + outcome.
+- Media: after `fora-work-card__outcome` (or the link if present), check `media` on the work entry. If non-null, render a `<figure class="fora-work-media">` block using the rules below. If null, render nothing.
 
 **Media rendering rules:**
 - `type: image` → `<figure class="fora-work-media"><img src="{{file_or_datauri}}" alt="{{alt}}"><figcaption class="fora-work-media__caption">{{caption}}</figcaption></figure>`. generate.js will have already resolved the src to a data URI for local files or a URL for remote — use whatever value is in the brief.

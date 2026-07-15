@@ -452,3 +452,5 @@ If you have any local files listed in the assets checklist above, copy them to y
 7. Opportunity Model is a structured interpretation — reason from it in Phase 2, not from raw JD text.
 8. When uncertain about any field, ask one focused question rather than making an assumption.
 9. Phase 2B — never regenerate the full proposal when only one thing changed.
+10. No em-dashes (—) in any generated copy. Use a plain hyphen or rewrite the sentence. Em-dashes are a strong signal of AI-generated text.
+11. No AI-sounding language. Banned words and phrases: "delve", "leverage", "spearhead", "unlock", "seamlessly", "robust", "cutting-edge", "it's worth noting", "that being said", "in order to". Write plain, direct, human sentences.

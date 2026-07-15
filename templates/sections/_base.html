@@ -433,6 +433,7 @@ img {
   max-width: 620px;
 }
 .fora-work-card__label {
+  display: block;
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 400;
@@ -440,6 +441,9 @@ img {
   text-transform: uppercase;
   color: var(--color-muted);
   margin-bottom: 4px;
+}
+.fora-work-card__decision + .fora-work-card__label {
+  margin-top: var(--space-3);
 }
 .fora-work-card__decision {
   font-family: var(--font-sans);

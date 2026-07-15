@@ -25,6 +25,9 @@ Your output is a **single, complete, self-contained HTML file** — ready to ope
 5. Do not invent copy. Every word must trace to the brief.
 6. Respect tone_notes from the brief exactly.
 7. Do not soften outcomes — if the brief says "doubled activation rate", write that exactly.
+8. No em-dashes (—). Use a plain hyphen or rewrite the sentence. Em-dashes read as AI-generated.
+9. No AI-sounding language. Avoid: "delve", "leverage", "spearhead", "unlock", "seamlessly", "robust", "cutting-edge", "it's worth noting", "that being said". Plain, direct language only.
+10. Vary sentence length and structure. No two consecutive sentences starting the same way.
 8. Use ONLY the class names defined in the section templates and `_base.html`. Do not invent new class names.
    Wrong: `class="fora-title"`, `class="fora-header"`, `class="fora-day-column"`, `class="fora-positioning-line"`
    Right: `class="fora-act1__heading"`, `class="fora-eyebrow"`, `class="fora-day-card"`, `class="fora-act1__positioning"`
@@ -78,10 +81,25 @@ Every section must appear exactly once, in this exact order. If a section has no
 
 **act1_hero:** `philosophy_note` renders as `<p class="fora-act1__philosophy">` — italic, no quotation marks. Signals render as `.fora-signal-card` items inside `.fora-act1__signals` grid. Each signal card: `<div class="fora-signal-card"><span class="fora-signal-card__label">…</span><p class="fora-signal-card__value">…</p></div>`.
 
-**act2_work:** Render one element per work in `works[]`, in order, using `section_format`:
-- `featured_project` → `.fora-work-card` — header with `.fora-work-card__company` + `.fora-work-card__badge`, body with `.fora-work-card__framing`, then `.fora-work-card__label` + `.fora-work-card__decision`, then `.fora-work-card__label` + `.fora-work-card__outcome`
-- `timeline_entry` → `.fora-work-card` with timeline styling (same structure, lighter treatment)
-- `signal_card` → `.fora-signal-card` inside a `.fora-signals__grid`
+**act2_work:** Render one element per work in `works[]`, in order. ALL work entries use this exact HTML structure — regardless of `section_format`. No h3 tags, no fora-work-body, no `<strong>` labels:
+
+```html
+<div class="fora-work-card">
+  <div class="fora-work-card__header">
+    <span class="fora-work-card__company">{{title}} — {{company_name}}</span>
+    <span class="fora-work-card__badge">{{section_format_label}}</span>
+  </div>
+  <div class="fora-work-card__body">
+    <p class="fora-work-card__framing">{{framing_angle}}</p>
+    <span class="fora-work-card__label">THE DECISION</span>
+    <p class="fora-work-card__decision">{{decision_to_surface}}</p>
+    <span class="fora-work-card__label">THE OUTCOME</span>
+    <p class="fora-work-card__outcome">{{outcome_to_surface}}</p>
+  </div>
+</div>
+```
+
+Badge label by format: `featured_project` → "Featured", `signal_card` → "Signal", `case_study_link` → "Case Study", `timeline_entry` → "Timeline". For `timeline_entry`: omit the badge and `fora-work-card__framing`, start with label + decision + outcome directly. For `case_study_link` with a url: add `<a class="fora-work-card__link" href="{{url}}">View case study →</a>` after the outcome.
 
 **act3_bring:** Three columns (day_15, day_30, day_90) inside `.fora-act3__grid`. Each column is a `.fora-day-card` with `.fora-day-card__header` (containing `.fora-day-card__label` + `.fora-day-card__title`) and `.fora-day-card__body`. `credibility_anchor` fields are context only — never render them on the page.
 
