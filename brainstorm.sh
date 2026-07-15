@@ -150,6 +150,7 @@ fetch_jd() {
 # ── Save brief interactively ─────────────────────────────────────────────────
 save_brief() {
   local slug="$1"
+  local template_id="${2:-three-act}"
   local brief_path="$BRIEFS_DIR/${slug}.json"
 
   mkdir -p "$BRIEFS_DIR"
@@ -249,43 +250,53 @@ save_brief() {
   # Save the file
   printf '%s' "$content" > "$brief_path"
 
-  # Clear any terminal noise from clipboard paste, then print clean result
+  # Inject the chosen template_id into the saved brief
+  local updated
+  updated=$(node -e "
+    const fs = require('fs');
+    const b = JSON.parse(fs.readFileSync('$brief_path', 'utf8'));
+    b._meta = b._meta || {};
+    b._meta.template_id = '$template_id';
+    process.stdout.write(JSON.stringify(b, null, 2));
+  " 2>/dev/null)
+  if [[ -n "$updated" ]]; then
+    printf '%s' "$updated" > "$brief_path"
+  fi
+
   echo ""
   echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
   ok "Brief saved → briefs/${slug}.json"
   ok "Valid JSON confirmed"
+  ok "Template: ${template_id}"
   echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
   echo ""
 }
 
-# ── Template picker ──────────────────────────────────────────────────────────
-pick_template() {
-  local brief_path="$1"
+# ── Template picker — returns template id, called BEFORE AI chat ─────────────
+pick_template_choice() {
+  echo "" >&2
+  echo -e "${BOLD}──────────────────────────────────────────────────${RESET}" >&2
+  echo -e "${BOLD}Choose a page template${RESET}" >&2
+  echo -e "${BOLD}──────────────────────────────────────────────────${RESET}" >&2
+  echo "" >&2
+  echo -e "  ${BOLD}1) three-act${RESET}  ${DIM}(default)${RESET}" >&2
+  echo -e "     Who I Am → Work → First 90 Days → CTA" >&2
+  echo -e "     ${DIM}Best for: most roles. Identity leads, work follows.${RESET}" >&2
+  echo "" >&2
+  echo -e "  ${BOLD}2) work-first${RESET}" >&2
+  echo -e "     Work → Who I Am → First 90 Days → CTA" >&2
+  echo -e "     ${DIM}Best for: craft-focused roles, engineering cultures, strong case studies.${RESET}" >&2
+  echo "" >&2
+  echo -e "  ${BOLD}3) single-statement${RESET}" >&2
+  echo -e "     One positioning line → One case study → First 90 Days → CTA" >&2
+  echo -e "     ${DIM}Best for: minimal brands, leadership roles, when one story outweighs a list.${RESET}" >&2
+  echo "" >&2
 
-  echo ""
-  echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
-  echo -e "${BOLD}Choose a page template${RESET}"
-  echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
-  echo ""
-  echo -e "  ${BOLD}1) three-act${RESET}  ${DIM}(default)${RESET}"
-  echo -e "     Who I Am → Work → First 90 Days → CTA"
-  echo -e "     ${DIM}Best for: most roles. Identity leads, work follows.${RESET}"
-  echo ""
-  echo -e "  ${BOLD}2) work-first${RESET}"
-  echo -e "     Work → Who I Am → First 90 Days → CTA"
-  echo -e "     ${DIM}Best for: craft-focused roles, engineering cultures, strong case studies.${RESET}"
-  echo ""
-  echo -e "  ${BOLD}3) single-statement${RESET}"
-  echo -e "     One positioning line → One case study → First 90 Days → CTA"
-  echo -e "     ${DIM}Best for: minimal brands, leadership roles, when one story outweighs a list.${RESET}"
-  echo ""
-
-  # Offer to open previews if examples exist
+  # Offer browser preview if examples exist
   local examples_dir="$SCRIPT_DIR/examples"
-  if [[ -f "$examples_dir/alex-rivera/output/index.html" ]] || \
-     [[ -f "$examples_dir/alex-rivera-work-first/output/index.html" ]]; then
-    echo -e "  ${DIM}Want to preview the templates in your browser first? (y/n)${RESET}"
-    read -r preview_choice
+  if [[ -f "$examples_dir/alex-rivera/output/index.html" ]]; then
+    echo -e "  ${DIM}Preview examples in browser first? (y/n)${RESET}" >&2
+    read -r preview_choice < /dev/tty
     if [[ "$preview_choice" == "y" || "$preview_choice" == "Y" ]]; then
       [[ -f "$examples_dir/alex-rivera/output/index.html" ]] && \
         open "$examples_dir/alex-rivera/output/index.html"
@@ -293,43 +304,24 @@ pick_template() {
         open "$examples_dir/alex-rivera-work-first/output/index.html"
       [[ -f "$examples_dir/alex-rivera-single-statement/output/index.html" ]] && \
         open "$examples_dir/alex-rivera-single-statement/output/index.html"
-      echo ""
-      echo -e "  ${DIM}(Opened in browser — come back here to pick)${RESET}"
-      echo ""
+      echo "" >&2
+      echo -e "  ${DIM}Opened in browser — come back here when ready.${RESET}" >&2
+      echo "" >&2
     fi
   fi
 
-  echo -e "  Enter 1, 2, or 3 — or press Enter for default (three-act):"
-  read -r template_choice
+  echo -e "  Enter 1, 2, or 3 — or press Enter for default (three-act):" >&2
+  read -r template_choice < /dev/tty
 
-  local template_id
   case "${template_choice:-1}" in
-    1|"") template_id="three-act" ;;
-    2)    template_id="work-first" ;;
-    3)    template_id="single-statement" ;;
+    1|"") echo "three-act" ;;
+    2)    echo "work-first" ;;
+    3)    echo "single-statement" ;;
     *)
-      warn "Invalid choice — using three-act."
-      template_id="three-act"
+      warn "Invalid choice — using three-act." >&2
+      echo "three-act"
       ;;
   esac
-
-  # Write template_id into the saved brief
-  local updated
-  updated=$(node -e "
-    const fs = require('fs');
-    const b = JSON.parse(fs.readFileSync('$brief_path', 'utf8'));
-    b._meta.template_id = '$template_id';
-    process.stdout.write(JSON.stringify(b, null, 2));
-  ")
-
-  if [[ -n "$updated" ]]; then
-    printf '%s' "$updated" > "$brief_path"
-    ok "Template set → ${template_id}"
-  else
-    warn "Could not update template_id in brief — defaulting to three-act at runtime."
-  fi
-
-  echo ""
 }
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -392,15 +384,39 @@ main() {
   jd_text=$(fetch_jd "$jd_url")
   ok "Job description fetched ($(echo "$jd_text" | wc -l | tr -d ' ') lines)"
 
+  # ── Template picker — before AI chat so the brief is generated correctly ─────
+  local template_id
+  template_id=$(pick_template_choice)
+
   # Read files
   local prompt profile
   prompt=$(cat "$PROMPT_FILE")
   profile=$(cat "$PROFILE_FILE")
 
+  # Build template context line to inject into brainstorm prompt
+  local template_note
+  case "$template_id" in
+    work-first)
+      template_note="TEMPLATE: work-first — lead with work (act2) before identity (act1). The brief's works[] array is the opening section. act1 comes second. Eyebrows: '01 — The Work' and '02 — Who I Am'."
+      ;;
+    single-statement)
+      template_note="TEMPLATE: single-statement — minimal. One positioning line as the h1 (not the designer's name). One case study only (strongest match). No signal grid. Eyebrows are minimal or empty."
+      ;;
+    *)
+      template_note="TEMPLATE: three-act (default) — identity first (act1), then work (act2), then commitments (act3). Standard structure."
+      ;;
+  esac
+
   # Assemble the full paste
   local assembled
   assembled="$(cat <<ASSEMBLED
 $prompt
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## TEMPLATE CHOICE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+$template_note
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## DESIGNER PROFILE (profile.json)
@@ -422,12 +438,11 @@ ASSEMBLED
   # Copy to clipboard
   copy_to_clipboard "$assembled"
 
-  local char_count=${#assembled}
   local line_count
   line_count=$(echo "$assembled" | wc -l | tr -d ' ')
 
   echo ""
-  ok "Prompt assembled and copied to clipboard ($line_count lines)"
+  ok "Prompt assembled and copied to clipboard ($line_count lines, template: ${template_id})"
   echo ""
   echo -e "${BOLD}──────────────────────────────────────────────────${RESET}"
   echo -e "${BOLD}Step 1 of 2 — Run the brainstorm${RESET}"
@@ -441,12 +456,8 @@ ASSEMBLED
   echo "  6. Copy the JSON block it outputs"
   echo ""
 
-  # Save the brief
-  save_brief "$slug"
-
-  # ── Template picker ──────────────────────────────────────────────────────────
-  local brief_path="$BRIEFS_DIR/${slug}.json"
-  pick_template "$brief_path"
+  # Save the brief — template_id is injected directly during save
+  save_brief "$slug" "$template_id"
 
   # Only offer to continue if running standalone (not called from run.sh)
   if [[ "${FORA_CALLED_FROM_RUN:-}" != "true" ]]; then
