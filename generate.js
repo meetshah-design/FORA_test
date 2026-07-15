@@ -856,14 +856,20 @@ Regenerate before deploying:
   info('Assembling page...');
   const fullHtml = assembler(sectionOutputs, dsTokens, brief, profile);
 
-  // Write to output/
-  const outputDir  = path.join(__dirname, 'output', plan.slug);
+  // Write output — if brief is inside examples/, write next to it (examples/*/output/)
+  // Otherwise write to root output/ (normal user runs)
+  const isExample  = briefPath.includes(`${path.sep}examples${path.sep}`) ||
+                     briefPath.includes('/examples/');
+  const outputDir  = isExample
+    ? path.join(path.dirname(briefPath), 'output')
+    : path.join(__dirname, 'output', plan.slug);
   const outputFile = path.join(outputDir, 'index.html');
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(outputFile, fullHtml, 'utf8');
 
+  const relOut     = path.relative(__dirname, outputFile);
   const fileSizeKB = Math.round(fs.statSync(outputFile).size / 1024);
-  ok(`Page assembled → output/${plan.slug}/index.html (${fileSizeKB}KB)`);
+  ok(`Page assembled → ${relOut} (${fileSizeKB}KB)`);
 
   // Exit 2 for partial failure — run.sh uses this to show recovery options
   if (partialFailure) process.exitCode = 2;
