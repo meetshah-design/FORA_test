@@ -212,7 +212,8 @@ async function callOpenAI(systemPrompt, userMessage) {
 // ════════════════════════════════════════════════════════════════════════════
 function planner(brief, templateJson) {
   const plan = {
-    slug:          `${brief._meta.company}-${brief._meta.role}`
+    slug:          (brief._meta.slug_override ||
+                    `${brief._meta.company}-${brief._meta.role}`)
                      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     template_id:   brief._meta.template_id,
     section_order: templateJson.section_order,

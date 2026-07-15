@@ -1,0 +1,114 @@
+{
+  "_meta": {
+    "schema_version": "2.1.0",
+    "generated": "2025-01-15",
+    "company": "Meridian",
+    "role": "Head of Design",
+    "jd_url": "https://meridian.finance/careers/head-of-design",
+    "confidence_score": 84,
+    "template_id": "single-statement",
+    "design_system": "own",
+    "company_ds_url": null,
+    "company_logo_url": "https://logo.clearbit.com/meridian.finance",
+    "company_primary_color": null,
+    "posthog_event_tag": "meridian-head-of-design",
+    "slug_override": "meridian-head-of-design-ss"
+  },
+  "opportunity_model": {
+    "company_stage": "Series B — proven product, scaling GTM. Design hire is likely about maturing the practice, not 0-to-1.",
+    "design_maturity": "Emerging — JD mentions 'building the design function' and 'establishing process', suggesting design has been IC-only so far.",
+    "hiring_signal": "First design leadership hire. Team of 2 ICs currently. This role is expected to hire 2–3 more within 12 months.",
+    "cultural_tone": "Builder-first. JD language is direct and specific about outcomes. No mentions of process or methodology — they want someone who ships.",
+    "recommended_positioning": "Founding designer experience + systems at scale — exactly the profile for a team that needs to go from IC-only to a functioning design practice."
+  },
+  "static_wrapper": {
+    "nav_badge": "For Meridian",
+    "nav_portfolio_url": "https://alexrivera.design"
+  },
+  "act1_who_i_am": {
+    "emphasis": "founding_designer",
+    "positioning_line": "I've built design practices from scratch twice — once at a seed-stage developer tools startup, once at a Series B fintech. Meridian is the third.",
+    "philosophy_note": "A design system is a bet on the future. The tokens and components matter less than the decisions behind them — what's included, what's excluded, and why. I write those decisions down.",
+    "philosophy_note_source": "on_systems"
+  },
+  "act2_what_ive_done": {
+    "intro_line": "Two companies, two design practices built from scratch — here's what that actually looked like.",
+    "works": [
+      {
+        "order": 1,
+        "source_id": "vaultpay-onboarding",
+        "title": "Merchant Onboarding — VaultPay",
+        "framing_angle": "Lead with the research-to-decision story. Meridian is a fintech — they'll understand why onboarding conversion matters. The specific decision (progressive disclosure) shows design thinking, not just execution.",
+        "decision_to_surface": "Progressive disclosure over linear checklist — match the document ask to the moment the merchant needs the capability it unlocks",
+        "outcome_to_surface": "Onboarding completion rate: 34% → 71%. Average time to first transaction: 11 days → 3 days.",
+        "section_format": "featured_project",
+        "nda_note": null,
+        "media": {
+          "type": null,
+          "file": null,
+          "url": null,
+          "alt": null,
+          "caption": null
+        }
+      },
+      {
+        "order": 2,
+        "source_id": "senior-pd-vaultpay",
+        "title": "VaultPay Design System",
+        "framing_angle": "Frame as an infrastructure decision, not a design deliverable. Built before they had a DS engineer. The bet on token alignment is the interesting decision for a technical audience.",
+        "decision_to_surface": "Built the design system before we had a dedicated DS engineer — mapped Figma tokens 1:1 to engineering tokens already in the codebase",
+        "outcome_to_surface": "Adopted by 8 engineers. No new component built outside the system in 14 months.",
+        "section_format": "signal_card",
+        "nda_note": null,
+        "media": {
+          "type": null,
+          "file": null,
+          "url": null,
+          "alt": null,
+          "caption": null
+        }
+      },
+      {
+        "order": 3,
+        "source_id": "product-designer-stackform",
+        "title": "First Designer — Stackform",
+        "framing_angle": "This is the founding designer story. Lead with the research-before-redesign decision — it's the evidence that they think before they execute. Relevant to Meridian because this is exactly the kind of hire they're making.",
+        "decision_to_surface": "Proposed a 3-week discovery sprint before any redesign work — to understand why conversion was low before designing a solution to it",
+        "outcome_to_surface": "Discovery changed the entire redesign brief — the problem was onboarding confusion, not UI quality.",
+        "section_format": "timeline_entry",
+        "nda_note": null,
+        "media": {
+          "type": null,
+          "file": null,
+          "url": null,
+          "alt": null,
+          "caption": null
+        }
+      }
+    ]
+  },
+  "act3_what_ill_bring": {
+    "intro_line": "What the first 90 days looks like — specifically for a team at Meridian's stage.",
+    "day_15": {
+      "title": "Map the current state",
+      "body": "Before proposing anything, I want to understand what exists — the product surface, the design files, how engineering and design currently hand off, and where the two current ICs feel most constrained. I'll run structured 1:1s with both designers and three product managers in the first two weeks. The output is a written map of the design practice as it exists today — not a roadmap, just an honest inventory.",
+      "credibility_anchor": "Did this at both Stackform and VaultPay — the inventory always reveals the real problem, which is rarely what the hiring manager described."
+    },
+    "day_30": {
+      "title": "Ship one thing and establish the review process",
+      "body": "By day 30 I want one shipped design contribution — not a system or a strategy document, an actual product change. Alongside that: a lightweight design review process that both ICs buy into. Weekly, async-first, with a written decision log. The goal is to establish that design decisions at Meridian are documented and reasoned, not just made.",
+      "credibility_anchor": "Built the design review process at VaultPay in month 2. It's still running 18 months later."
+    },
+    "day_90": {
+      "title": "Design system foundation and first hire brief",
+      "body": "By day 90 the team should have a token set that engineering has adopted, even if the component library is minimal. And I should have a clear point of view on the first additional hire — what skill the team is missing, what kind of designer fills it, and what good looks like for that role. That brief goes to the founders before I write a single job description.",
+      "credibility_anchor": "Built VaultPay's design system v1 in 6 weeks while shipping product work. Hired two designers at VaultPay — both are still there."
+    }
+  },
+  "cold_message": {
+    "hook": "I've built design practices from scratch at two fintech companies — once as sole designer, once as the first design lead. The VaultPay onboarding work took completion rate from 34% to 71%.",
+    "body": "I put together a short page for this application — it covers the specific work and what the first 90 days would look like at Meridian's stage. Easier to read than a CV.",
+    "sign_off": "Alex"
+  },
+  "tone_notes": "Meridian's JD is direct and outcome-focused. Match that energy — no hedging, no filler. Lead with decisions and numbers."
+}
