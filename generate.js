@@ -496,14 +496,26 @@ function buildSectionBrief(sectionId, brief, profile, plan) {
         cold_message:   brief.cold_message,
       };
 
-    case 'footer':
+    case 'footer': {
+      const vercelBase = process.env.VERCEL_URL
+        ? process.env.VERCEL_URL.replace(/\/$/, '')
+        : process.env.VERCEL_PROJECT_NAME
+          ? `https://${process.env.VERCEL_PROJECT_NAME}.vercel.app`
+          : null;
+      const aboutUrl = process.env.DEPLOY_DOMAIN
+        ? `https://${process.env.DEPLOY_DOMAIN}/about`
+        : vercelBase
+          ? `${vercelBase}/about`
+          : 'https://github.com/meetshahco/FORA';
       return {
         ...base,
         designer_name:  profile.identity?.name,
         portfolio_url:  profile.identity?.portfolio_url,
         linkedin_url:   profile.identity?.linkedin_url,
         email:          profile.identity?.email,
+        about_url:      aboutUrl,
       };
+    }
 
     default:
       return base;
@@ -597,6 +609,16 @@ async function publisher(slug, htmlContent) {
     encoding: 'base64',
   });
   deployedSlugs.add(slug);
+
+  // Add about page — deployed alongside every application page
+  const aboutPath = path.join(__dirname, 'about', 'index.html');
+  if (fs.existsSync(aboutPath)) {
+    files.push({
+      file:     'about/index.html',
+      data:     Buffer.from(fs.readFileSync(aboutPath, 'utf8')).toString('base64'),
+      encoding: 'base64',
+    });
+  }
 
   // Add vercel.json — cleanUrls serves /slug/index.html at /slug automatically.
   // trailingSlash: false keeps URLs clean (no redirect loop).

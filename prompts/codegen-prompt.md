@@ -149,4 +149,5 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 
 **footer:**
 - If any URL field is null, omit that link entirely.
-- Render links in order: portfolio → LinkedIn → email.
+- Render links in order: portfolio → LinkedIn → email → "What is this?"
+- `about_url` is always present — render it as `<a href="{{about_url}}" target="_blank" rel="noopener">What is this?</a>`.

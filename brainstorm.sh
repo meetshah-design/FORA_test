@@ -78,7 +78,7 @@ paste_from_clipboard() {
 # isn't misleadingly named after the board. For company-hosted URLs we use the
 # domain (e.g. "notion", "linear"). The actual company name in _meta.company is
 # set by the AI from JD content — this slug is only used as a temp filename.
-JOB_BOARD_DOMAINS="linkedin|greenhouse|lever|workday|indeed|ashby|breezy|bamboohr|smartrecruiters|recruitee|jobvite|myworkdayjobs"
+JOB_BOARD_DOMAINS="linkedin|greenhouse|lever|workday|indeed|ashby|breezy|bamboohr|smartrecruiters|recruitee|jobvite|myworkdayjobs|workable|apply\.workable"
 
 derive_slug() {
   local url="$1"
