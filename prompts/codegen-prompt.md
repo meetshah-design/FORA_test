@@ -107,7 +107,7 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
     <span class="fora-work-card__badge">{{section_format}}</span>
   </div>
   <div class="fora-work-card__body">
-    <p class="fora-work-card__framing">{{framing_angle}}</p>
+    <p class="fora-work-card__framing">{{framing_line}}</p>
     <span class="fora-work-card__label">THE DECISION</span>
     <p class="fora-work-card__decision">{{decision_to_surface}}</p>
     <span class="fora-work-card__label">THE OUTCOME</span>
@@ -119,6 +119,7 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 </div>
 ```
 
+- `{{framing_line}}` is **not** the `framing_angle` field from the brief. `framing_angle` is internal creative direction — it tells you the angle to take. You must write a fresh 1-sentence opening line **in first person, addressed to the reader**, using `framing_angle` as your brief. Never paste `framing_angle` verbatim. Bad: "Lead with the team and systems angle." Good: "I've built design teams and stayed hands-on at the same time — that duality defines how I work."
 - `section_format` badge text: `featured_project` → "Featured", `signal_card` → "Signal", `case_study_link` → "Case Study", `timeline_entry` → "Timeline".
 - For `timeline_entry`: omit the badge and `fora-work-card__framing`. Start directly with label + decision + outcome.
 - Media: after `fora-work-card__outcome` (or the link if present), check `media` on the work entry. If non-null, render a `<figure class="fora-work-media">` block using the rules below. If null, render nothing.
