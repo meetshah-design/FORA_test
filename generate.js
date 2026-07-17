@@ -338,7 +338,17 @@ function dsLoader(brief) {
 // To switch strategies later, only this function needs to change.
 // ════════════════════════════════════════════════════════════════════════════
 function resolveMedia(media) {
-  if (!media || media.type === null) return null;
+  if (!media) return null;
+
+  // type:null but url present — promote to 'link' so codegen renders a plain fallback anchor.
+  // This covers portfolio links, Drive decks, and any generic case-study URL the brainstorm
+  // captures without knowing the embed type. Codegen will render: <a href="url">View case study →</a>
+  if (media.type === null && media.url) {
+    return { ...media, type: 'link' };
+  }
+
+  // Nothing useful to render
+  if (media.type === null) return null;
 
   // Remote embeds (loom, youtube, figma) — nothing to resolve, URL is already in the brief
   if (['loom', 'youtube', 'figma'].includes(media.type)) {

@@ -103,7 +103,7 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 ```html
 <div class="fora-work-card">
   <div class="fora-work-card__header">
-    <span class="fora-work-card__company">{{title}} — {{company_name}}</span>
+    <span class="fora-work-card__company">{{title}}</span>
     <span class="fora-work-card__badge">{{section_format}}</span>
   </div>
   <div class="fora-work-card__body">
@@ -128,6 +128,7 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 - `type: loom` → `<figure class="fora-work-media fora-work-media--embed"><div class="fora-embed-wrapper"><iframe src="https://www.loom.com/embed/{{id_extracted_from_url}}" frameborder="0" allowfullscreen></iframe></div><figcaption class="fora-work-media__caption">{{caption}}</figcaption></figure>`. Extract the Loom share ID from the URL (last path segment).
 - `type: youtube` → same iframe pattern using `https://www.youtube.com/embed/{{video_id}}`. Extract video ID from the URL.
 - `type: figma` → `<figure class="fora-work-media fora-work-media--embed"><div class="fora-embed-wrapper"><iframe src="https://www.figma.com/embed?embed_host=fora&url={{encoded_figma_url}}" allowfullscreen></iframe></div><figcaption class="fora-work-media__caption">{{caption}}</figcaption></figure>`.
+- `type: link` → Render a plain anchor below the outcome: `<a class="fora-work-card__link" href="{{url}}" target="_blank" rel="noopener">View case study →</a>`. This type covers portfolio links, Drive decks, and any generic URL that isn't an image or embed. Do not wrap it in a `<figure>`.
 - Never render media if `nda_note` is present — skip the figure block entirely.
 
 **act3_bring:**

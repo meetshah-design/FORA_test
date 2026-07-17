@@ -300,14 +300,17 @@ For each work I've selected, a single image, Loom, Figma link, or GIF can make t
 → **[Work title 3]** — screenshot, Loom, Figma link, or skip?
 
 For local files (images/GIFs), just tell me the filename — you'll drop it in assets/ when we're done.
-For links (Loom, YouTube, Figma), paste the URL."
+For links (Loom, YouTube, Figma, portfolio, Drive, or any case study URL), paste the URL."
 
 ---
 
 **When the designer responds:**
 
 For each work entry, record:
-- If they provide a URL (Loom/YouTube/Figma): set type accordingly, url = provided URL
+- If they provide a Loom URL: set type = loom, url = provided URL
+- If they provide a YouTube URL: set type = youtube, url = provided URL
+- If they provide a Figma URL: set type = figma, url = provided URL
+- If they provide any other URL (portfolio page, Drive deck, case study link, etc.): set type = null, url = provided URL. The pipeline will render it as a plain "View case study" link.
 - If they name a local file: set type = image, file = "assets/[filename they gave]"
 - If they skip: set media = null
 
@@ -380,7 +383,7 @@ Then output:
         "media": {
           "type": "image | loom | youtube | figma | null",
           "file": "[relative path e.g. assets/filename.png — for local images only, else null]",
-          "url": "[full URL — for loom/youtube/figma embeds, else null]",
+          "url": "[full URL — required for loom/youtube/figma embeds and for any generic URL (portfolio, Drive, case study). null only when type is image or media is skipped.]",
           "alt": "[descriptive alt text]",
           "caption": "[one sentence — what the viewer is looking at and why it matters]"
         }
