@@ -99,10 +99,30 @@ function detectProvider() {
 // ── Unified AI caller ────────────────────────────────────────────────────────
 async function callAI(systemPrompt, userMessage) {
   const provider = detectProvider();
-  switch (provider) {
-    case 'anthropic': return callAnthropic(systemPrompt, userMessage);
-    case 'gemini':    return callGemini(systemPrompt, userMessage);
-    case 'openai':    return callOpenAI(systemPrompt, userMessage);
+  const MAX_RETRIES = 3;
+  const BACKOFF_MS = [1000, 2000, 4000];
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      switch (provider) {
+        case 'anthropic': return await callAnthropic(systemPrompt, userMessage);
+        case 'gemini':    return await callGemini(systemPrompt, userMessage);
+        case 'openai':    return await callOpenAI(systemPrompt, userMessage);
+      }
+    } catch (err) {
+      // Only retry on 5xx server errors and 429 rate limits
+      const is5xx = /API error 5\d\d/.test(err.message);
+      const isRateLimit = /API error 429|rate.limit/i.test(err.message);
+
+      if ((is5xx || isRateLimit) && attempt < MAX_RETRIES) {
+        const delay = BACKOFF_MS[attempt - 1];
+        warn(`${provider} API error (attempt ${attempt}/${MAX_RETRIES}): ${err.message}`);
+        warn(`Retrying in ${delay / 1000}s...`);
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      throw err; // Non-retryable or final attempt — rethrow
+    }
   }
 }
 
@@ -765,6 +785,16 @@ Force provider:     AI_PROVIDER=gemini        (if you have multiple keys set)
   }
   ok(`Brief loaded: ${brief._meta.company} — ${brief._meta.role}`);
 
+  // ── Validate brief schema version ───────────────────────────────────────
+  const EXPECTED_SCHEMA = '2.1.0';
+  const briefVersion = brief._meta?.schema_version;
+  if (!briefVersion) {
+    warn('Brief has no _meta.schema_version. Consider regenerating with the current brainstorm prompt.');
+  } else if (briefVersion !== EXPECTED_SCHEMA) {
+    warn(`Brief schema ${briefVersion} does not match expected ${EXPECTED_SCHEMA}. Some fields may not render correctly.`);
+  }
+
+
   // ── Load template ────────────────────────────────────────────────────────
   const templateId   = brief._meta.template_id || 'three-act';
   const templatePath = path.join(__dirname, 'templates', `${templateId}.json`);
@@ -811,18 +841,17 @@ Regenerate before deploying:
         try { apps = JSON.parse(fs.readFileSync(appsPath, 'utf8')); } catch {}
       }
       apps.push({
-        company:      brief._meta.company,
-        role:         brief._meta.role,
-        slug:         plan.slug,
-        url:          liveUrl,
-        published_at: new Date().toISOString(),
-        confidence:   brief._meta.confidence_score || null,
-        template:     brief._meta.template_id,
-        mode:         '2b-manual-codegen',
-        prompt_versions: {
-          brainstorm: brief._meta.schema_version || null,
-          codegen:    'manual',
-        },
+        company:          brief._meta.company,
+        role:             brief._meta.role,
+        slug:             plan.slug,
+        url:              liveUrl,
+        published_at:     new Date().toISOString(),
+        template_id:      brief._meta.template_id,
+        confidence_score:  brief._meta.confidence_score || null,
+        schema_version:   brief._meta.schema_version || null,
+        mode:             '2b-manual-codegen',
+        outcome:          null,
+        notes:            '',
       });
       fs.mkdirSync(path.dirname(appsPath), { recursive: true });
       fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');
@@ -949,22 +978,17 @@ Regenerate before deploying:
         try { apps = JSON.parse(fs.readFileSync(appsPath, 'utf8')); } catch {}
       }
       apps.push({
-        company:      brief._meta.company,
-        role:         brief._meta.role,
-        slug:         plan.slug,
-        url:          liveUrl,
-        published_at: new Date().toISOString(),
-        prompt_versions: { codegen: 'codegen-v1' },
-        page_opens: 0,
-        time_on_page_seconds: null,
-        first_response_days: null,
-        manual_edits_made: false,
-        stories_used: [],
-        story_performance: {},
-        outcome: null,
-        interview: false,
-        response_received: false,
-        notes: '',
+        company:          brief._meta.company,
+        role:             brief._meta.role,
+        slug:             plan.slug,
+        url:              liveUrl,
+        published_at:     new Date().toISOString(),
+        template_id:      brief._meta.template_id,
+        confidence_score:  brief._meta.confidence_score || null,
+        schema_version:   brief._meta.schema_version || null,
+        mode:             'ai-codegen',
+        outcome:          null,
+        notes:            '',
       });
       fs.mkdirSync(path.dirname(appsPath), { recursive: true });
       fs.writeFileSync(appsPath, JSON.stringify(apps, null, 2), 'utf8');

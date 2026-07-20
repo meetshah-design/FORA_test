@@ -144,6 +144,19 @@ fetch_jd() {
     exit 0
   fi
 
+  # Short content likely means a JS-rendered page (LinkedIn, Greenhouse, Lever)
+  local char_count=${#text}
+  if [[ $char_count -lt 500 ]]; then
+    warn "JD fetch returned very little content (${char_count} chars)."
+    warn "This job board likely uses JavaScript rendering."
+    echo ""
+    echo "  The partial content will be included, but you should also:"
+    echo "  1. Open the JD URL in your browser"
+    echo "  2. Select all the job description text and copy it"
+    echo "  3. Paste it into your AI chat after the brainstorm prompt"
+    echo ""
+  fi
+
   echo "$text"
 }
 

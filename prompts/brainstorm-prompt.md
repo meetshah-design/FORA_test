@@ -234,36 +234,39 @@ Rules for Act 3:
 
 ### DESIGN SYSTEM DIRECTION
 
-**Option A — Designer's own DS** (default)
+**Option A - Designer's own DS** (default)
 Loaded from design-system/default.md. The designer's personal visual system.
 
-**Option B — Company's DS**
-If the company has a public design system, the page adopts their visual identity as a theme layer. This is the high-signal move for design-aware companies.
+**Option B - Company's DS** (manual for V1)
+Company DS auto-fetch is not yet built. If the designer wants to adopt the company's visual identity:
+- Ask if they know the company's public design system URL or Storybook link
+- Record it as `company_ds_url` in the brief
+- Note: the designer will need to manually extract CSS tokens and paste them into `design-system/default.md` before running codegen
 
-To find a public DS, check for:
-- A known DS name (Razorpay Blade, Shopify Polaris, Atlassian Atlaskit, IBM Carbon, Salesforce Lightning, etc.)
-- A public Storybook (storybook.[company].com or [company].com/storybook)
-- A /design, /brand, or /components subdomain
-- An open-source component library on npm under the company's GitHub org
-
-State your recommendation. If Option B: name the DS, provide the URL for token extraction, describe what the page would look like in their system. If uncertain: default to Option A and note what to check.
+State your recommendation. If Option B: name the DS (if known), provide the URL, and flag that manual extraction is required.
 
 ---
 
-### TEMPLATE RECOMMENDATION
+### TEMPLATE
 
-Choose one:
-- `three-act` — hero → work → bring → signals → cta. Default. Works for most roles.
-- `work-first` — leads with proof of work, hero second. Best for senior IC, research-heavy, or technical roles where the work needs to speak first.
-- `single-statement` — minimal: one strong statement + one case study + cta. Best for design-forward companies or leadership roles where restraint is a signal.
-
-State your recommendation and why it fits.
+The designer has already selected the template before this conversation began (in `brainstorm.sh`). Do not discuss, recommend, or change the template. It will be set in the brief automatically.
 
 ---
 
 ### COLD MESSAGE FRAMING
 
-One sentence on what the cold message should lead with — before the URL. Connect it to something specific in the JD or Opportunity Model. Not a generic intro.
+Write a cold message the designer can send alongside the page URL. Structure:
+
+- **Sentence 1:** Who you are and one specific thing you built or led.
+- **Sentence 2:** The specific angle connecting your background to this role - reference something from the JD or Opportunity Model.
+- **Sentence 3:** The live page URL, introduced naturally (not "please find attached").
+- **Sentence 4:** One specific question or observation about the role that shows you've thought about it.
+
+Rules:
+- Max 4 sentences total. Shorter is better.
+- Do not use "I am excited", "I would love to", "I'm reaching out", or "passionate about".
+- Write like a peer, not a candidate. Direct, warm, specific.
+- The hook should connect to something concrete in the JD or company, not a generic intro.
 
 ---
 

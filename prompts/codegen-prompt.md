@@ -72,6 +72,7 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 7. If a slot value is null, an empty string, or explicitly false: omit the element that would have contained it entirely. Do not render empty tags, empty links, or placeholder text.
 8. If a required brief field is missing or undefined: leave that slot visually absent but do not fabricate content. For text slots: render an empty string. For link slots: omit the element. Never generate placeholder text like "Coming soon", "TBD", or "[role]".
 9. Do not add decorative elements, dividers, icons, illustrations, or visual flourishes not specified in the section template or brief. The design system is intentionally minimal. Restraint is the correct output.
+10. All URL fields from the brief must render as clickable `<a>` tags. Never render a URL as plain text. `portfolio_url` renders as `<a href="{{url}}">`. `email` renders as `<a href="mailto:{{email}}">`. `cta_url` renders as `<a class="fora-cta__button" href="{{url}}">`. If a URL field is present but the value is `#` or empty, still render the `<a>` with that value.
 
 ### Copy rules
 6. Write from the brief. Every piece of copy must trace to the brief — do not improvise or add information that isn't there.
@@ -119,7 +120,7 @@ Your output is **only the filled HTML**. Nothing else. No explanation, no markdo
 </div>
 ```
 
-- `{{framing_line}}` is **not** the `framing_angle` field from the brief. `framing_angle` is internal creative direction — it tells you the angle to take. You must write a fresh 1-sentence opening line **in first person, addressed to the reader**, using `framing_angle` as your brief. Never paste `framing_angle` verbatim. Bad: "Lead with the team and systems angle." Good: "I've built design teams and stayed hands-on at the same time — that duality defines how I work."
+- `{{framing_line}}` is **not** the `framing_angle` field from the brief. `framing_angle` is internal creative direction - it tells you the angle to take. You must write a fresh 1-sentence opening line **in first person, addressed to the reader**, using `framing_angle` as your brief. Never paste `framing_angle` verbatim. Bad: "Lead with the team and systems angle." Good: "I've built design teams and stayed hands-on at the same time - that duality defines how I work."
 - `section_format` badge text: `featured_project` → "Featured", `signal_card` → "Signal", `case_study_link` → "Case Study", `timeline_entry` → "Timeline".
 - For `timeline_entry`: omit the badge and `fora-work-card__framing`. Start directly with label + decision + outcome.
 - Media: after `fora-work-card__outcome` (or the link if present), check `media` on the work entry. If non-null, render a `<figure class="fora-work-media">` block using the rules below. If null, render nothing.
